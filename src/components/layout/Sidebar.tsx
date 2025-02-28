@@ -13,7 +13,8 @@ import {
   CircleUser,
   PackageSearch,
   Store,
-  Menu
+  Menu,
+  LineChart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -109,6 +110,13 @@ export function Sidebar() {
           label="Analytics" 
           path="/analytics" 
           active={location.pathname.startsWith("/analytics")} 
+          onClick={closeMobileMenu}
+        />
+        <SidebarItem 
+          icon={<LineChart size={20} />} 
+          label="Sales Chart" 
+          path="/sales-chart" 
+          active={location.pathname.startsWith("/sales-chart")} 
           onClick={closeMobileMenu}
         />
         <SidebarItem 
