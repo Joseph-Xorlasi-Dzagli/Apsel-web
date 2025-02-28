@@ -11,6 +11,7 @@ import SalesChartPage from "./pages/SalesChart";
 import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
 import Inventory from "./pages/Inventory";
+import BusinessHub from "./pages/BusinessHub";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -67,6 +68,14 @@ const App = () => (
             element={
               <Layout>
                 <Inventory />
+              </Layout>
+            } 
+          />
+          <Route 
+            path="/business-hub" 
+            element={
+              <Layout>
+                <BusinessHub />
               </Layout>
             } 
           />
