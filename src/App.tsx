@@ -8,6 +8,8 @@ import { Layout } from "./components/layout/Layout";
 import Index from "./pages/Index";
 import Analytics from "./pages/Analytics";
 import SalesChartPage from "./pages/SalesChart";
+import Orders from "./pages/Orders";
+import OrderDetail from "./pages/OrderDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +42,22 @@ const App = () => (
             element={
               <Layout>
                 <SalesChartPage />
+              </Layout>
+            } 
+          />
+          <Route 
+            path="/orders" 
+            element={
+              <Layout>
+                <Orders />
+              </Layout>
+            } 
+          />
+          <Route 
+            path="/orders/:id" 
+            element={
+              <Layout>
+                <OrderDetail />
               </Layout>
             } 
           />
