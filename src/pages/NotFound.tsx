@@ -1,5 +1,9 @@
+
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const NotFound = () => {
   const location = useLocation();
@@ -12,13 +16,25 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="max-w-md w-full space-y-6 text-center">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Page Not Found</AlertTitle>
+          <AlertDescription>
+            The page you're looking for doesn't exist or has been moved.
+          </AlertDescription>
+        </Alert>
+        
+        <div className="py-8">
+          <h1 className="text-7xl font-bold text-brand mb-4">404</h1>
+          <p className="text-xl text-muted-foreground mb-8">
+            We couldn't find the page you were looking for.
+          </p>
+          <Button asChild size="lg" className="mx-auto">
+            <a href="/">Return to Dashboard</a>
+          </Button>
+        </div>
       </div>
     </div>
   );
