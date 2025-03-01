@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Link } from "react-router-dom";
 
 export function Header() {
   const isMobile = useIsMobile();
@@ -52,7 +53,14 @@ export function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+              <DropdownMenuLabel className="flex justify-between items-center">
+                <span>Notifications</span>
+                <Link to="/notifications">
+                  <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-blue-600">
+                    View all
+                  </Button>
+                </Link>
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               {notifications.length > 0 ? (
                 notifications.map((notification) => (
@@ -123,7 +131,14 @@ export function Header() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+            <DropdownMenuLabel className="flex justify-between items-center">
+              <span>Notifications</span>
+              <Link to="/notifications">
+                <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-blue-600">
+                  View all
+                </Button>
+              </Link>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             {notifications.length > 0 ? (
               notifications.map((notification) => (
