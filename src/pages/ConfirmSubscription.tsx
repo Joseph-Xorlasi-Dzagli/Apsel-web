@@ -1,10 +1,11 @@
 
 import { useState } from "react";
-import { ArrowLeft, Plus, CreditCard, CheckCircle, Check } from "lucide-react";
+import { ArrowLeft, Plus, CreditCard, CheckCircle, Check, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { Separator } from "@/components/ui/separator";
 
 const ConfirmSubscription = () => {
   const navigate = useNavigate();
@@ -29,8 +30,8 @@ const ConfirmSubscription = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-md">
-      <div className="flex items-center gap-2 mb-6">
+    <div className="container mx-auto p-6 max-w-4xl">
+      <div className="flex items-center gap-3 mb-8">
         <Button 
           variant="ghost" 
           size="icon" 
@@ -39,7 +40,7 @@ const ConfirmSubscription = () => {
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-2xl font-bold">Get Merchant</h1>
+        <h1 className="text-3xl font-bold">Confirm Subscription</h1>
       </div>
 
       {showSuccess ? (
@@ -69,58 +70,152 @@ const ConfirmSubscription = () => {
         </div>
       ) : null}
 
-      <Card className="mb-6 bg-brand-light border-0">
-        <CardContent className="p-4">
-          <h2 className="text-2xl font-bold text-brand mt-1">Merchant</h2>
-          <p className="text-xl font-bold">Ghc 150.00<span className="text-sm font-normal">/month</span></p>
-          <p className="text-sm mb-2">You're saving 20%</p>
-          <p className="text-brand font-medium">Renews 30th March 2024</p>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Selected Plan</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-brand-light p-4 rounded-lg">
+                <h2 className="text-2xl font-bold text-brand">Merchant</h2>
+                <p className="text-xl font-bold mt-2">Ghc 150.00<span className="text-sm font-normal">/month</span></p>
+                <p className="text-sm mb-2">You're saving 20%</p>
+                <p className="text-brand font-medium">Renews 30th March 2024</p>
+              </div>
+            </CardContent>
+          </Card>
 
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold">Billing Account</h2>
-        <Button size="icon" className="rounded-full bg-brand hover:bg-brand-dark">
-          <Plus className="h-5 w-5" />
-        </Button>
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment Method</CardTitle>
+              <CardDescription>Select a payment method to complete your subscription</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div 
+                  className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${paymentMethod === 'gpay' ? 'border-brand' : ''}`}
+                  onClick={() => handleSelectPaymentMethod('gpay')}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="font-medium">UPI</span>
+                    <span className="text-sm text-muted-foreground">ending in 1234</span>
+                  </div>
+                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${paymentMethod === 'gpay' ? 'border-brand bg-brand' : 'border-gray-300'}`}>
+                    {paymentMethod === 'gpay' && <Check className="h-3 w-3 text-white" />}
+                  </div>
+                </div>
+                <div 
+                  className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${paymentMethod === 'visa' ? 'border-brand' : ''}`}
+                  onClick={() => handleSelectPaymentMethod('visa')}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="font-medium">Visa</span>
+                    <span className="text-sm text-muted-foreground">ending in 5678</span>
+                  </div>
+                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${paymentMethod === 'visa' ? 'border-brand bg-brand' : 'border-gray-300'}`}>
+                    {paymentMethod === 'visa' && <Check className="h-3 w-3 text-white" />}
+                  </div>
+                </div>
+                <div 
+                  className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${paymentMethod === 'mastercard' ? 'border-brand' : ''}`}
+                  onClick={() => handleSelectPaymentMethod('mastercard')}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="font-medium">Master Card</span>
+                    <span className="text-sm text-muted-foreground">ending in 9012</span>
+                  </div>
+                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${paymentMethod === 'mastercard' ? 'border-brand bg-brand' : 'border-gray-300'}`}>
+                    {paymentMethod === 'mastercard' && <Check className="h-3 w-3 text-white" />}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center mt-6">
+                <Button variant="outline" className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Add New Payment Method
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Billing Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Full Name</p>
+                    <p className="font-medium">John Doe</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Email</p>
+                    <p className="font-medium">john.doe@example.com</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Billing Address</p>
+                  <p className="font-medium">123 Main Street, Apt 4B</p>
+                  <p className="font-medium">Accra, Ghana</p>
+                </div>
+              </div>
+              <Button variant="outline" className="mt-4">Edit Information</Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="md:col-span-1">
+          <Card className="sticky top-6">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Receipt className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>Order Summary</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Plan</span>
+                  <span>Merchant</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Billing</span>
+                  <span>Monthly</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span>Ghc 150.00</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Discount</span>
+                  <span className="text-green-600">-Ghc 30.00</span>
+                </div>
+                
+                <Separator />
+                
+                <div className="flex justify-between font-bold">
+                  <span>Total</span>
+                  <span>Ghc 120.00</span>
+                </div>
+                
+                <p className="text-xs text-muted-foreground mt-2">
+                  By confirming your subscription, you agree to our Terms of Service and Privacy Policy. You can cancel anytime.
+                </p>
+                
+                <Button 
+                  className="w-full bg-brand hover:bg-brand-dark text-white font-bold mt-4"
+                  onClick={handleSubscribe}
+                >
+                  Confirm Subscription
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      <div className="space-y-3 mb-10">
-        <div 
-          className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${paymentMethod === 'gpay' ? 'border-brand' : ''}`}
-          onClick={() => handleSelectPaymentMethod('gpay')}
-        >
-          <div className="flex items-center gap-3">
-            <span className="font-medium">UPI</span>
-          </div>
-          <div className={`w-5 h-5 rounded border ${paymentMethod === 'gpay' ? 'bg-brand' : ''}`} />
-        </div>
-        <div 
-          className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${paymentMethod === 'visa' ? 'border-brand' : ''}`}
-          onClick={() => handleSelectPaymentMethod('visa')}
-        >
-          <div className="flex items-center gap-3">
-            <span className="font-medium">Visa</span>
-          </div>
-          <div className={`w-5 h-5 rounded border ${paymentMethod === 'visa' ? 'bg-brand' : ''}`} />
-        </div>
-        <div 
-          className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${paymentMethod === 'mastercard' ? 'border-brand' : ''}`}
-          onClick={() => handleSelectPaymentMethod('mastercard')}
-        >
-          <div className="flex items-center gap-3">
-            <span className="font-medium">Master Card</span>
-          </div>
-          <div className={`w-5 h-5 rounded border ${paymentMethod === 'mastercard' ? 'bg-brand' : ''}`} />
-        </div>
-      </div>
-
-      <Button 
-        className="w-full bg-brand hover:bg-brand-dark text-white font-bold uppercase"
-        onClick={handleSubscribe}
-      >
-        Confirm Subscription
-      </Button>
     </div>
   );
 };
