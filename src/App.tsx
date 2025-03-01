@@ -15,6 +15,9 @@ import BusinessHub from "./pages/BusinessHub";
 import Notifications from "./pages/Notifications";
 import HelpFAQ from "./pages/HelpFAQ";
 import Settings from "./pages/Settings";
+import Billing from "./pages/Billing";
+import SubscriptionPlans from "./pages/SubscriptionPlans";
+import ConfirmSubscription from "./pages/ConfirmSubscription";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -103,6 +106,30 @@ const App = () => (
             element={
               <Layout>
                 <Settings />
+              </Layout>
+            } 
+          />
+          <Route 
+            path="/billing" 
+            element={
+              <Layout>
+                <Billing />
+              </Layout>
+            } 
+          />
+          <Route 
+            path="/billing/plans" 
+            element={
+              <Layout>
+                <SubscriptionPlans />
+              </Layout>
+            } 
+          />
+          <Route 
+            path="/billing/confirm" 
+            element={
+              <Layout>
+                <ConfirmSubscription />
               </Layout>
             } 
           />

@@ -19,7 +19,8 @@ import {
   Card, 
   CardContent, 
   CardHeader, 
-  CardTitle 
+  CardTitle,
+  CardDescription 
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -27,8 +28,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Settings = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [profileForm, setProfileForm] = useState({
     name: "G-Connect Mobile",
@@ -238,19 +241,27 @@ const Settings = () => {
           <Card>
             <CardHeader>
               <CardTitle>Billing Information</CardTitle>
+              <CardDescription>
+                Manage your subscription plans and payment methods
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="p-4 border rounded-md">
+              <div className="p-4 border rounded-md bg-brand-light border-brand/20">
                 <div className="flex justify-between items-center mb-4">
                   <div>
                     <h3 className="font-medium">Current Plan</h3>
-                    <p className="text-sm text-muted-foreground">Business Pro</p>
+                    <p className="text-xl font-bold text-brand">Merchant</p>
+                    <p className="text-sm text-muted-foreground">You're saving 20%</p>
                   </div>
-                  <span className="text-brand font-medium">$49.99/month</span>
+                  <span className="text-brand font-medium">Renews in 3 days</span>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">Upgrade Plan</Button>
-                  <Button variant="outline" size="sm" className="text-destructive">Cancel Subscription</Button>
+                  <Button 
+                    className="bg-brand hover:bg-brand-dark" 
+                    onClick={() => navigate('/billing')}
+                  >
+                    Manage Subscription
+                  </Button>
                 </div>
               </div>
               
@@ -267,9 +278,13 @@ const Settings = () => {
                     </div>
                     <Button variant="ghost" size="sm">Edit</Button>
                   </div>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={() => navigate('/billing')}
+                  >
                     <CreditCard className="mr-2 h-4 w-4" />
-                    Add Payment Method
+                    Manage Payment Methods
                   </Button>
                 </div>
               </div>
@@ -280,20 +295,20 @@ const Settings = () => {
                   <div className="flex items-center justify-between p-3 border rounded-md">
                     <div>
                       <p className="font-medium">April 2023</p>
-                      <p className="text-sm text-muted-foreground">Business Pro Plan</p>
+                      <p className="text-sm text-muted-foreground">Merchant Plan</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span>$49.99</span>
+                      <span>Ghc 150.00</span>
                       <Button variant="ghost" size="sm">Receipt</Button>
                     </div>
                   </div>
                   <div className="flex items-center justify-between p-3 border rounded-md">
                     <div>
                       <p className="font-medium">March 2023</p>
-                      <p className="text-sm text-muted-foreground">Business Pro Plan</p>
+                      <p className="text-sm text-muted-foreground">Merchant Plan</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span>$49.99</span>
+                      <span>Ghc 150.00</span>
                       <Button variant="ghost" size="sm">Receipt</Button>
                     </div>
                   </div>
