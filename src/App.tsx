@@ -13,6 +13,8 @@ import OrderDetail from "./pages/OrderDetail";
 import Inventory from "./pages/Inventory";
 import BusinessHub from "./pages/BusinessHub";
 import Notifications from "./pages/Notifications";
+import HelpFAQ from "./pages/HelpFAQ";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -85,6 +87,22 @@ const App = () => (
             element={
               <Layout>
                 <Notifications />
+              </Layout>
+            } 
+          />
+          <Route 
+            path="/faqs" 
+            element={
+              <Layout>
+                <HelpFAQ />
+              </Layout>
+            } 
+          />
+          <Route 
+            path="/settings" 
+            element={
+              <Layout>
+                <Settings />
               </Layout>
             } 
           />
