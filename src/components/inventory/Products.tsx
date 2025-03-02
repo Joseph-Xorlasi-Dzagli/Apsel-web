@@ -1,45 +1,59 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader,
+  TableRow 
+} from "@/components/ui/table";
+import { 
+  Card,
+  CardContent
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, Edit, MoreHorizontal, Search, Trash } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { sampleProducts, sampleCategories } from "@/lib/data";
-import { useToast } from "@/hooks/use-toast";
+import { Pencil, Trash2 } from "lucide-react";
 import { ProductFilters } from "./ProductFilters";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { sampleProducts } from "@/lib/data";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export function Products() {
-  const isMobile = useIsMobile();
+interface ProductsProps {
+  viewMode?: "list" | "tile";
+}
+
+export function Products({ viewMode = "list" }: ProductsProps) {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [stockFilter, setStockFilter] = useState<"all" | "in-stock" | "low-stock" | "out-of-stock">("all");
+  const [sortBy, setSortBy] = useState<"name" | "price" | "stock">("name");
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState<"name" | "price" | "stock" | "sold">("name");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const productsPerPage = 10;
+  const productsPerPage = 9;
 
-  const handleEdit = (product: any) => {
+  const handleEdit = (id: string) => {
     toast({
       title: "Edit Product",
-      description: `You are editing ${product.name}`,
+      description: `Editing product with ID: ${id} will be available soon!`,
     });
   };
 
-  const handleDelete = (product: any) => {
+  const handleDelete = (id: string) => {
     toast({
       title: "Delete Product",
-      description: `You want to delete ${product.name}`,
-      variant: "destructive",
+      description: `Deleting product with ID: ${id} will be available soon!`,
     });
   };
 
-  // Filter products based on search, category and stock
+  // Filter and sort products
   const filterProducts = () => {
     let filtered = [...sampleProducts];
 
@@ -47,46 +61,26 @@ export function Products() {
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
-        (product) =>
-          product.name.toLowerCase().includes(term) ||
-          product.category.toLowerCase().includes(term)
+        (product) => product.name.toLowerCase().includes(term)
       );
     }
 
     // Filter by category
     if (categoryFilter !== "all") {
-      filtered = filtered.filter((product) => product.category === categoryFilter);
-    }
-
-    // Filter by stock
-    if (stockFilter === "in-stock") {
-      filtered = filtered.filter((product) => product.stock > 10);
-    } else if (stockFilter === "low-stock") {
-      filtered = filtered.filter((product) => product.stock > 0 && product.stock <= 10);
-    } else if (stockFilter === "out-of-stock") {
-      filtered = filtered.filter((product) => product.stock === 0);
+      filtered = filtered.filter(
+        (product) => product.category === categoryFilter
+      );
     }
 
     // Sort products
     filtered.sort((a, b) => {
-      let compareResult = 0;
-
-      switch (sortBy) {
-        case "name":
-          compareResult = a.name.localeCompare(b.name);
-          break;
-        case "price":
-          compareResult = a.price - b.price;
-          break;
-        case "stock":
-          compareResult = a.stock - b.stock;
-          break;
-        case "sold":
-          compareResult = a.sold - b.sold;
-          break;
+      if (sortBy === "name") {
+        return a.name.localeCompare(b.name);
+      } else if (sortBy === "price") {
+        return a.price - b.price;
+      } else {
+        return a.stock - b.stock;
       }
-
-      return sortOrder === "asc" ? compareResult : -compareResult;
     });
 
     return filtered;
@@ -100,242 +94,166 @@ export function Products() {
     currentPage * productsPerPage
   );
 
-  const getStockStatus = (stock: number) => {
-    if (stock === 0) return <Badge variant="destructive">Out of stock</Badge>;
-    if (stock <= 10) return <Badge variant="outline" className="text-status-pending border-status-pending">Low stock</Badge>;
-    return <Badge variant="outline" className="text-status-completed border-status-completed">In stock</Badge>;
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col-reverse md:flex-row gap-4 justify-between">
-        <ProductFilters 
-          categoryFilter={categoryFilter}
-          setCategoryFilter={setCategoryFilter}
-          stockFilter={stockFilter}
-          setStockFilter={setStockFilter}
-          categories={sampleCategories.map(cat => cat.name)}
-        />
-        
-        <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-          <Select value={`${sortBy}-${sortOrder}`} onValueChange={(val) => {
-            const [newSortBy, newSortOrder] = val.split('-') as ["name" | "price" | "stock" | "sold", "asc" | "desc"];
-            setSortBy(newSortBy);
-            setSortOrder(newSortOrder);
-          }}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="name-asc">Name (A-Z)</SelectItem>
-              <SelectItem value="name-desc">Name (Z-A)</SelectItem>
-              <SelectItem value="price-asc">Price (Low to High)</SelectItem>
-              <SelectItem value="price-desc">Price (High to Low)</SelectItem>
-              <SelectItem value="stock-asc">Stock (Low to High)</SelectItem>
-              <SelectItem value="stock-desc">Stock (High to Low)</SelectItem>
-              <SelectItem value="sold-asc">Sales (Low to High)</SelectItem>
-              <SelectItem value="sold-desc">Sales (High to Low)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Products</CardTitle>
-          <CardDescription>
-            {totalProducts} products found
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isMobile ? (
-            <div className="space-y-4">
+      <ProductFilters 
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        categoryFilter={categoryFilter}
+        setCategoryFilter={setCategoryFilter}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+      />
+
+      {viewMode === "list" ? (
+        <div className="overflow-x-auto rounded-lg border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Product</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead className="text-right">Price</TableHead>
+                <TableHead className="text-right">Stock</TableHead>
+                <TableHead className="text-right">Sold</TableHead>
+                <TableHead></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {currentProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="p-4 border rounded-lg space-y-3 hover:bg-accent/50 transition-colors"
-                >
-                  <div className="flex justify-between items-start">
+                <TableRow key={product.id} className="hover:bg-muted/50">
+                  <TableCell>
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-12 w-12 rounded-md border">
+                      <Avatar className="h-9 w-9">
                         <AvatarImage src={product.image} alt={product.name} />
-                        <AvatarFallback className="rounded-md">
-                          {product.name.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
+                        <AvatarFallback>{product.name.charAt(0)}</AvatarFallback>
                       </Avatar>
-                      <div>
-                        <h3 className="font-medium">{product.name}</h3>
-                        <p className="text-sm text-muted-foreground">{product.category}</p>
-                      </div>
+                      <span className="font-medium">{product.name}</span>
                     </div>
-                    
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEdit(product)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem 
-                          onClick={() => handleDelete(product)}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          <Trash className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-bold">GHS {product.price.toFixed(2)}</p>
-                      <p className="text-sm text-muted-foreground">{product.sold} sold</p>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      {getStockStatus(product.stock)}
-                      <span className="text-sm mt-1">{product.stock} in stock</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              
-              {currentProducts.length === 0 && (
-                <div className="text-center py-10">
-                  <p className="text-muted-foreground">No products found</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-muted/50">
-                      <th className="text-left p-3 font-medium text-xs uppercase text-muted-foreground">
-                        Product
-                      </th>
-                      <th className="text-left p-3 font-medium text-xs uppercase text-muted-foreground">
-                        Category
-                      </th>
-                      <th className="text-right p-3 font-medium text-xs uppercase text-muted-foreground">
-                        Price
-                      </th>
-                      <th className="text-right p-3 font-medium text-xs uppercase text-muted-foreground">
-                        Stock
-                      </th>
-                      <th className="text-right p-3 font-medium text-xs uppercase text-muted-foreground">
-                        Total Sales
-                      </th>
-                      <th className="text-right p-3 font-medium text-xs uppercase text-muted-foreground">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentProducts.map((product) => (
-                      <tr
-                        key={product.id}
-                        className="border-t hover:bg-muted/50 transition-colors"
+                  </TableCell>
+                  <TableCell>{product.category}</TableCell>
+                  <TableCell className="text-right">GHC {product.price.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">{product.stock}</TableCell>
+                  <TableCell className="text-right">{product.sold}</TableCell>
+                  <TableCell>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(product.id)}
                       >
-                        <td className="p-3">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-9 w-9 rounded-md border">
-                              <AvatarImage src={product.image} alt={product.name} />
-                              <AvatarFallback className="rounded-md">
-                                {product.name.substring(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="font-medium">{product.name}</span>
-                          </div>
-                        </td>
-                        <td className="p-3">{product.category}</td>
-                        <td className="p-3 text-right font-medium">
-                          GHS {product.price.toFixed(2)}
-                        </td>
-                        <td className="p-3 text-right">
-                          <div className="flex flex-col items-end">
-                            {getStockStatus(product.stock)}
-                            <span className="text-sm mt-1">{product.stock} units</span>
-                          </div>
-                        </td>
-                        <td className="p-3 text-right">
-                          {product.sold} units
-                        </td>
-                        <td className="p-3 text-right">
-                          <div className="flex justify-end gap-1">
-                            <Button size="icon" variant="ghost" onClick={() => handleEdit(product)}>
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              size="icon" 
-                              variant="ghost" 
-                              className="text-destructive hover:text-destructive"
-                              onClick={() => handleDelete(product)}
-                            >
-                              <Trash className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                    
-                    {currentProducts.length === 0 && (
-                      <tr>
-                        <td colSpan={6} className="p-10 text-center text-muted-foreground">
-                          No products found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-          
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4">
-              <div className="text-sm text-muted-foreground">
-                Showing {(currentPage - 1) * productsPerPage + 1} to{" "}
-                {Math.min(currentPage * productsPerPage, totalProducts)} of{" "}
-                {totalProducts} products
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  disabled={currentPage === 1}
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(product.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {currentProducts.map((product) => (
+            <Card key={product.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <div className="aspect-square w-full relative mb-4 bg-muted/50 rounded-md overflow-hidden">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="object-cover w-full h-full"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "/placeholder.svg";
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-medium">{product.name}</h3>
+                      <p className="text-sm text-muted-foreground">{product.category}</p>
+                    </div>
+                    <p className="font-bold">GHC {product.price.toFixed(2)}</p>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Stock</p>
+                      <p className={`font-medium ${product.stock < 10 ? 'text-red-500' : ''}`}>{product.stock} items</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Sold</p>
+                      <p className="font-medium">{product.sold} items</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleEdit(product.id)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleDelete(product.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p className="text-sm text-muted-foreground">
+          Showing {Math.min(1, totalProducts)} to {Math.min(currentPage * productsPerPage, totalProducts)} of {totalProducts} products
+        </p>
+
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }).map((_, index) => (
+              <PaginationItem key={index}>
+                <PaginationLink
+                  onClick={() => handlePageChange(index + 1)}
+                  isActive={currentPage === index + 1}
                 >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                  {index + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                onClick={() =>
+                  handlePageChange(Math.min(totalPages, currentPage + 1))
+                }
+                disabled={currentPage === totalPages}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </div>
   );
 }

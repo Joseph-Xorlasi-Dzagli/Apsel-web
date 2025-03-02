@@ -81,7 +81,10 @@ const SubscriptionPlans = () => {
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-3xl font-bold">Choose a Subscription Plan</h1>
+        <div>
+          <h1 className="text-3xl font-bold">Choose a Subscription Plan</h1>
+          <p className="text-muted-foreground">Select the plan that best fits your business needs</p>
+        </div>
       </div>
 
       <Tabs value={billingPeriod} className="mb-8">
@@ -101,11 +104,11 @@ const SubscriptionPlans = () => {
         </TabsList>
       </Tabs>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {plans.map((plan) => (
           <Card 
             key={plan.id}
-            className={`cursor-pointer transition-all ${selectedPlan === plan.id ? 'border-brand ring-2 ring-brand ring-opacity-50' : 'hover:shadow-md'}`}
+            className={`cursor-pointer transition-all hover:shadow-md ${selectedPlan === plan.id ? 'border-brand ring-2 ring-brand ring-opacity-50' : ''}`}
             onClick={() => handleSelectPlan(plan.id)}
           >
             <CardHeader className="pb-4">
@@ -117,7 +120,11 @@ const SubscriptionPlans = () => {
                     <span className="text-sm font-normal">/{billingPeriod === "monthly" ? "month" : "year"}</span>
                   </CardTitle>
                 </div>
-                {selectedPlan === plan.id && <Check className="h-5 w-5 text-green-500" />}
+                {selectedPlan === plan.id && (
+                  <div className="h-6 w-6 rounded-full bg-brand flex items-center justify-center">
+                    <Check className="h-4 w-4 text-white" />
+                  </div>
+                )}
               </div>
               <p className="text-sm">{plan.description}</p>
             </CardHeader>
@@ -148,32 +155,38 @@ const SubscriptionPlans = () => {
             <CardTitle>Plan Benefits</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                {planFeatures.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <div className="h-6 w-6 rounded-full bg-brand flex items-center justify-center">
-                      <Check className="h-4 w-4 text-white" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Core Features</h3>
+                <div className="space-y-3">
+                  {planFeatures.map((feature, index) => (
+                    <div key={index} className="flex items-center gap-3">
+                      <div className="h-6 w-6 rounded-full bg-brand flex items-center justify-center">
+                        <Check className="h-4 w-4 text-white" />
+                      </div>
+                      <span>{feature}</span>
                     </div>
-                    <span>{feature}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
 
-              <div className="space-y-3">
-                {[
-                  "Expert customer support",
-                  "Automatic data backups",
-                  "Advanced security features",
-                  "Regular feature updates"
-                ].map((feature, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <div className="h-6 w-6 rounded-full bg-brand flex items-center justify-center">
-                      <Check className="h-4 w-4 text-white" />
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Premium Features</h3>
+                <div className="space-y-3">
+                  {[
+                    "Expert customer support",
+                    "Automatic data backups",
+                    "Advanced security features",
+                    "Regular feature updates"
+                  ].map((feature, index) => (
+                    <div key={index} className="flex items-center gap-3">
+                      <div className="h-6 w-6 rounded-full bg-brand flex items-center justify-center">
+                        <Check className="h-4 w-4 text-white" />
+                      </div>
+                      <span>{feature}</span>
                     </div>
-                    <span>{feature}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </CardContent>
@@ -216,6 +229,13 @@ const SubscriptionPlans = () => {
               >
                 Get {plans.find(p => p.id === selectedPlan)?.name}
               </Button>
+              
+              <div className="text-center mt-2">
+                <p className="text-sm text-muted-foreground flex items-center justify-center">
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Secure payment processed by Stripe
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>

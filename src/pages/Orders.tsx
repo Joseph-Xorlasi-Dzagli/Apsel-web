@@ -7,9 +7,13 @@ import { OrderList } from "@/components/orders/OrderList";
 import { OrderFilters } from "@/components/orders/OrderFilters";
 import { OrderStats } from "@/components/orders/OrderStats";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Search, PlusCircle } from "lucide-react";
+import { Search, PlusCircle, Grid, List as ListIcon, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { OrderStatus, sampleOrders } from "@/lib/data";
+import { OrderStatus, sampleOrders, sampleTransactions } from "@/lib/data";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DatePickerWithRange } from "@/components/sales/DateRangePicker";
+import { DateRange } from "react-day-picker";
+import { addDays, format, subDays } from "date-fns";
 
 const Orders = () => {
   const isMobile = useIsMobile();
@@ -18,7 +22,16 @@ const Orders = () => {
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
   const [timeFilter, setTimeFilter] = useState<"today" | "week" | "month" | "all">("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<"list" | "tile">("list");
   const ordersPerPage = 10;
+  
+  // For transaction totals
+  const [totalTimeframe, setTotalTimeframe] = useState<"daily" | "weekly" | "monthly" | "yearly" | "custom">("daily");
+  const today = new Date();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subDays(today, 7),
+    to: today,
+  });
 
   const handleCreateOrder = () => {
     toast({
@@ -81,6 +94,52 @@ const Orders = () => {
     currentPage * ordersPerPage
   );
 
+  // Calculate transaction totals for different time periods
+  const calculateTransactionTotal = (period: "daily" | "weekly" | "monthly" | "yearly" | "custom") => {
+    let startDate: Date;
+    const now = new Date();
+    
+    switch (period) {
+      case "daily":
+        startDate = new Date(now.setHours(0, 0, 0, 0));
+        break;
+      case "weekly":
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case "monthly":
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 1);
+        break;
+      case "yearly":
+        startDate = new Date(now);
+        startDate.setFullYear(now.getFullYear() - 1);
+        break;
+      case "custom":
+        if (dateRange?.from) {
+          startDate = dateRange.from;
+        } else {
+          startDate = new Date(0);
+        }
+        break;
+      default:
+        startDate = new Date(0);
+    }
+    
+    const endDate = period === "custom" && dateRange?.to ? dateRange.to : now;
+    
+    const filteredTransactions = sampleTransactions.filter(transaction => {
+      const transactionDate = new Date(transaction.date);
+      return transactionDate >= startDate && transactionDate <= endDate;
+    });
+    
+    const total = filteredTransactions.reduce((sum, transaction) => {
+      return sum + (transaction.type === 'sale' ? transaction.amount : 0);
+    }, 0);
+    
+    return total.toFixed(2);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
@@ -93,6 +152,56 @@ const Orders = () => {
           Create Order
         </Button>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Transaction Totals</CardTitle>
+          <CardDescription>View transaction totals across different time periods</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+            <Card className="bg-brand-light border-brand/20">
+              <CardContent className="p-4">
+                <p className="text-sm font-medium text-muted-foreground">Daily</p>
+                <h3 className="text-2xl font-bold mt-1">GHS {calculateTransactionTotal("daily")}</h3>
+              </CardContent>
+            </Card>
+            <Card className="bg-brand-light border-brand/20">
+              <CardContent className="p-4">
+                <p className="text-sm font-medium text-muted-foreground">Weekly</p>
+                <h3 className="text-2xl font-bold mt-1">GHS {calculateTransactionTotal("weekly")}</h3>
+              </CardContent>
+            </Card>
+            <Card className="bg-brand-light border-brand/20">
+              <CardContent className="p-4">
+                <p className="text-sm font-medium text-muted-foreground">Monthly</p>
+                <h3 className="text-2xl font-bold mt-1">GHS {calculateTransactionTotal("monthly")}</h3>
+              </CardContent>
+            </Card>
+            <Card className="bg-brand-light border-brand/20">
+              <CardContent className="p-4">
+                <p className="text-sm font-medium text-muted-foreground">Yearly</p>
+                <h3 className="text-2xl font-bold mt-1">GHS {calculateTransactionTotal("yearly")}</h3>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex flex-col space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">Custom Range</p>
+                  <DatePickerWithRange 
+                    date={dateRange} 
+                    onDateChange={setDateRange} 
+                    className="w-full"
+                  />
+                  <div className="pt-2">
+                    <h3 className="text-xl font-bold">GHS {calculateTransactionTotal("custom")}</h3>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
 
       <OrderStats orders={sampleOrders} />
 
@@ -115,6 +224,24 @@ const Orders = () => {
                   className="pl-9"
                 />
               </div>
+              <div className="flex">
+                <Button
+                  variant={viewMode === "list" ? "default" : "outline"}
+                  size="icon"
+                  className="rounded-r-none"
+                  onClick={() => setViewMode("list")}
+                >
+                  <ListIcon className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === "tile" ? "default" : "outline"}
+                  size="icon"
+                  className="rounded-l-none"
+                  onClick={() => setViewMode("tile")}
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -134,6 +261,7 @@ const Orders = () => {
               totalOrders={totalOrders}
               onPageChange={setCurrentPage}
               ordersPerPage={ordersPerPage}
+              viewMode={viewMode}
             />
           </div>
         </CardContent>
