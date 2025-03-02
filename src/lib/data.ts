@@ -29,6 +29,32 @@ export interface Category {
   image: string;
 }
 
+export type OrderItem = {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+};
+
+export type OrderType = {
+  id: string;
+  customerName: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  date: string;
+  time: string;
+  status: OrderStatus;
+  items: OrderItem[];
+  subtotal: number;
+  shipping?: number;
+  tax?: number;
+  total: number;
+  notes?: string;
+  paymentMethod?: string;
+};
+
+
 export interface Transaction {
   id: string;
   date: string;

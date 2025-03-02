@@ -1,4 +1,4 @@
-
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/pagination";
 import { Order, OrderStatus } from "@/lib/data";
 import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Truck, MapPin } from "lucide-react";
 
@@ -31,6 +30,8 @@ interface OrderListProps {
   onPageChange: (page: number) => void;
   ordersPerPage: number;
   viewMode?: "list" | "tile";
+  onSelectOrder?: (order: Order) => void;
+  onViewOrder?: (orderId: string) => void;
 }
 
 const getStatusColor = (status: OrderStatus) => {
@@ -53,11 +54,30 @@ export function OrderList({
   totalOrders,
   onPageChange,
   ordersPerPage,
-  viewMode = "list"
+  viewMode = "list",
+  onSelectOrder,
+  onViewOrder
 }: OrderListProps) {
-  const navigate = useNavigate();
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+
   const startItem = (currentPage - 1) * ordersPerPage + 1;
   const endItem = Math.min(currentPage * ordersPerPage, totalOrders);
+
+  // Handle row click to select an order
+  const handleRowClick = (order: Order) => {
+    setSelectedOrderId(order.id);
+    if (onSelectOrder) {
+      onSelectOrder(order);
+    }
+  };
+
+  // Handle view button click
+  const handleViewClick = (e: React.MouseEvent, orderId: string) => {
+    e.stopPropagation(); // Prevent row click from firing
+    if (onViewOrder) {
+      onViewOrder(orderId);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -78,7 +98,16 @@ export function OrderList({
             </TableHeader>
             <TableBody>
               {orders.map((order) => (
-                <TableRow key={order.id} className="hover:bg-muted/50">
+                <TableRow
+                  key={order.id}
+                  className={`${
+                    selectedOrderId === order.id
+                      ? "hover:bg-blue-100"
+                      : "hover:bg-muted/50"
+                  } cursor-pointer ${
+                    selectedOrderId === order.id ? "bg-blue-100" : ""
+                  }`}
+                  onClick={() => handleRowClick(order)}>
                   <TableCell className="font-medium">{order.id}</TableCell>
                   <TableCell>{order.customerName}</TableCell>
                   <TableCell>
@@ -87,8 +116,7 @@ export function OrderList({
                   <TableCell>
                     <Badge
                       variant="outline"
-                      className={`${getStatusColor(order.status)}`}
-                    >
+                      className={`${getStatusColor(order.status)}`}>
                       {order.status}
                     </Badge>
                   </TableCell>
@@ -105,8 +133,7 @@ export function OrderList({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => navigate(`/orders/${order.id}`)}
-                    >
+                      onClick={(e) => handleViewClick(e, order.id)}>
                       View
                     </Button>
                   </TableCell>
@@ -118,14 +145,18 @@ export function OrderList({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {orders.map((order) => (
-            <Card key={order.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/orders/${order.id}`)}>
+            <Card
+              key={order.id}
+              className={`cursor-pointer hover:shadow-md transition-shadow ${
+                selectedOrderId === order.id ? "border-blue-500" : ""
+              }`}
+              onClick={() => handleRowClick(order)}>
               <CardContent className="p-5">
                 <div className="flex justify-between mb-3">
                   <span className="font-medium">Order #{order.id}</span>
                   <Badge
                     variant="outline"
-                    className={`${getStatusColor(order.status)}`}
-                  >
+                    className={`${getStatusColor(order.status)}`}>
                     {order.status}
                   </Badge>
                 </div>
@@ -160,8 +191,16 @@ export function OrderList({
                   </div>
                   <div className="flex justify-between pt-2 text-lg">
                     <span className="font-bold">Total</span>
-                    <span className="font-bold text-brand">GHC {order.total.toFixed(2)}</span>
+                    <span className="font-bold text-brand">
+                      GHC {order.total.toFixed(2)}
+                    </span>
                   </div>
+                  <Button
+                    className="w-full mt-4"
+                    variant="outline"
+                    onClick={(e) => handleViewClick(e, order.id)}>
+                    View
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -179,15 +218,16 @@ export function OrderList({
             <PaginationItem>
               <PaginationPrevious
                 onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                className={
+                  currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                }
               />
             </PaginationItem>
             {Array.from({ length: totalPages }).map((_, index) => (
               <PaginationItem key={index}>
                 <PaginationLink
                   onClick={() => onPageChange(index + 1)}
-                  isActive={currentPage === index + 1}
-                >
+                  isActive={currentPage === index + 1}>
                   {index + 1}
                 </PaginationLink>
               </PaginationItem>
@@ -197,7 +237,11 @@ export function OrderList({
                 onClick={() =>
                   onPageChange(Math.min(totalPages, currentPage + 1))
                 }
-                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                className={
+                  currentPage === totalPages
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
               />
             </PaginationItem>
           </PaginationContent>
