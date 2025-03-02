@@ -19,6 +19,7 @@ import Billing from "./pages/Billing";
 import SubscriptionPlans from "./pages/SubscriptionPlans";
 import ConfirmSubscription from "./pages/ConfirmSubscription";
 import NotFound from "./pages/NotFound";
+import ViewAllBillingHistory from "./pages/ViewAllBillingHistory";
 
 const queryClient = new QueryClient();
 
@@ -29,109 +30,117 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route 
-            path="/" 
+          <Route
+            path="/"
             element={
               <Layout>
                 <Index />
               </Layout>
-            } 
+            }
           />
-          <Route 
-            path="/analytics" 
+          <Route
+            path="/analytics"
             element={
               <Layout>
                 <Analytics />
               </Layout>
-            } 
+            }
           />
-          <Route 
-            path="/sales-chart" 
+          <Route
+            path="/sales-chart"
             element={
               <Layout>
                 <SalesChartPage />
               </Layout>
-            } 
+            }
           />
-          <Route 
-            path="/orders" 
+          <Route
+            path="/orders"
             element={
               <Layout>
                 <Orders />
               </Layout>
-            } 
+            }
           />
-          <Route 
-            path="/orders/:id" 
+          <Route
+            path="/orders/:id"
             element={
               <Layout>
                 <OrderDetail />
               </Layout>
-            } 
+            }
           />
-          <Route 
-            path="/inventory" 
+          <Route
+            path="/inventory"
             element={
               <Layout>
                 <Inventory />
               </Layout>
-            } 
+            }
           />
-          <Route 
-            path="/business-hub" 
+          <Route
+            path="/business-hub"
             element={
               <Layout>
                 <BusinessHub />
               </Layout>
-            } 
+            }
           />
-          <Route 
-            path="/notifications" 
+          <Route
+            path="/notifications"
             element={
               <Layout>
                 <Notifications />
               </Layout>
-            } 
+            }
           />
-          <Route 
-            path="/faqs" 
+          <Route
+            path="/faqs"
             element={
               <Layout>
                 <HelpFAQ />
               </Layout>
-            } 
+            }
           />
-          <Route 
-            path="/settings" 
+          <Route
+            path="/settings"
             element={
               <Layout>
                 <Settings />
               </Layout>
-            } 
+            }
           />
-          <Route 
-            path="/billing" 
+          <Route
+            path="/billing"
             element={
               <Layout>
                 <Billing />
               </Layout>
-            } 
+            }
           />
-          <Route 
-            path="/billing/plans" 
+          <Route
+            path="/billing/plans"
             element={
               <Layout>
                 <SubscriptionPlans />
               </Layout>
-            } 
+            }
           />
-          <Route 
-            path="/billing/confirm" 
+          <Route
+            path="/billing/history"
+            element={
+              <Layout>
+                <ViewAllBillingHistory />
+              </Layout>
+            }
+          />
+          <Route
+            path="/billing/confirm"
             element={
               <Layout>
                 <ConfirmSubscription />
               </Layout>
-            } 
+            }
           />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

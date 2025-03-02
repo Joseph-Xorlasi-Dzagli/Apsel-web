@@ -153,106 +153,50 @@ const Orders = () => {
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Transaction Totals</CardTitle>
-          <CardDescription>View transaction totals across different time periods</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-            <Card className="bg-brand-light border-brand/20">
-              <CardContent className="p-4">
-                <p className="text-sm font-medium text-muted-foreground">Daily</p>
-                <h3 className="text-2xl font-bold mt-1">GHS {calculateTransactionTotal("daily")}</h3>
-              </CardContent>
-            </Card>
-            <Card className="bg-brand-light border-brand/20">
-              <CardContent className="p-4">
-                <p className="text-sm font-medium text-muted-foreground">Weekly</p>
-                <h3 className="text-2xl font-bold mt-1">GHS {calculateTransactionTotal("weekly")}</h3>
-              </CardContent>
-            </Card>
-            <Card className="bg-brand-light border-brand/20">
-              <CardContent className="p-4">
-                <p className="text-sm font-medium text-muted-foreground">Monthly</p>
-                <h3 className="text-2xl font-bold mt-1">GHS {calculateTransactionTotal("monthly")}</h3>
-              </CardContent>
-            </Card>
-            <Card className="bg-brand-light border-brand/20">
-              <CardContent className="p-4">
-                <p className="text-sm font-medium text-muted-foreground">Yearly</p>
-                <h3 className="text-2xl font-bold mt-1">GHS {calculateTransactionTotal("yearly")}</h3>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex flex-col space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">Custom Range</p>
-                  <DatePickerWithRange 
-                    date={dateRange} 
-                    onDateChange={setDateRange} 
-                    className="w-full"
-                  />
-                  <div className="pt-2">
-                    <h3 className="text-xl font-bold">GHS {calculateTransactionTotal("custom")}</h3>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </CardContent>
-      </Card>
+
 
       <OrderStats orders={sampleOrders} />
 
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col md:flex-row justify-between gap-4">
-            <div>
-              <CardTitle>All Orders</CardTitle>
-              <CardDescription>
-                View and manage all your customer orders
-              </CardDescription>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Search orders..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-              <div className="flex">
-                <Button
-                  variant={viewMode === "list" ? "default" : "outline"}
-                  size="icon"
-                  className="rounded-r-none"
-                  onClick={() => setViewMode("list")}
-                >
-                  <ListIcon className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "tile" ? "default" : "outline"}
-                  size="icon"
-                  className="rounded-l-none"
-                  onClick={() => setViewMode("tile")}
-                >
-                  <Grid className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardHeader>
+      <Card className="border-none">
         <CardContent>
           <div className="space-y-4">
-            <OrderFilters
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              timeFilter={timeFilter}
-              setTimeFilter={setTimeFilter}
-            />
+            <div className="flex flex-col md:flex-row items-end justify-between gap-4">
+              <div className="w-full">
+                <OrderFilters
+                  statusFilter={statusFilter}
+                  setStatusFilter={setStatusFilter}
+                  timeFilter={timeFilter}
+                  setTimeFilter={setTimeFilter}
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    placeholder="Search orders..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                <div className="flex">
+                  <Button
+                    variant={viewMode === "list" ? "default" : "outline"}
+                    size="icon"
+                    className="rounded-r-none"
+                    onClick={() => setViewMode("list")}>
+                    <ListIcon className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === "tile" ? "default" : "outline"}
+                    size="icon"
+                    className="rounded-l-none"
+                    onClick={() => setViewMode("tile")}>
+                    <Grid className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
 
             <OrderList
               orders={currentOrders}

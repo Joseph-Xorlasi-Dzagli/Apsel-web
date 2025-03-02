@@ -42,14 +42,17 @@ const Billing = () => {
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Billing & Subscription</h1>
-          <p className="text-muted-foreground">Manage your subscription and payment methods</p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Billing & Subscription
+          </h1>
+          <p className="text-muted-foreground">
+            Manage your subscription and payment methods
+          </p>
         </div>
-        <Button 
+        <Button
           className="bg-brand hover:bg-brand-dark text-white"
-          onClick={() => navigate("/billing/plans")}
-        >
-          Change Plan
+          onClick={() => navigate("/billing/plans")}>
+          Choose Plan
         </Button>
       </div>
 
@@ -58,36 +61,27 @@ const Billing = () => {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-        <CurrentPackageCard />
-        <BillingCycleCard 
-          billingPeriod={billingPeriod}
-          setBillingPeriod={setBillingPeriod}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
         <div className="md:col-span-2">
-          {hasPaymentMethod ? (
-            <PaymentMethodsList 
-              paymentMethod={paymentMethod}
-              handleSelectPaymentMethod={handleSelectPaymentMethod}
-              setHasPaymentMethod={setHasPaymentMethod}
-            />
-          ) : (
-            <NoPaymentMethod 
-              paymentMethod={paymentMethod}
-              handleSelectPaymentMethod={handleSelectPaymentMethod}
-              setHasPaymentMethod={setHasPaymentMethod}
-            />
-          )}
+          <div className="pb-8">
+            {hasPaymentMethod ? (
+              <PaymentMethodsList
+                paymentMethod={paymentMethod}
+                handleSelectPaymentMethod={handleSelectPaymentMethod}
+                setHasPaymentMethod={setHasPaymentMethod}
+              />
+            ) : (
+              <NoPaymentMethod
+                paymentMethod={paymentMethod}
+                handleSelectPaymentMethod={handleSelectPaymentMethod}
+                setHasPaymentMethod={setHasPaymentMethod}
+              />
+            )}
+          </div>
+          <BillingHistory />
         </div>
-        
-        <SubscriptionSummary />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <BillingHistory />
-        <BillingInformation />
+        <div>
+          <SubscriptionSummary />
+        </div>
       </div>
     </div>
   );

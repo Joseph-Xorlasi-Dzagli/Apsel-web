@@ -22,13 +22,7 @@ const BusinessHub = () => {
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Business Center</CardTitle>
-          <CardDescription>
-            View your business profile, analytics, and growth opportunities
-          </CardDescription>
-        </CardHeader>
+      <Card className="border-none">
         <CardContent className="p-0">
           <Tabs 
             defaultValue="profile" 

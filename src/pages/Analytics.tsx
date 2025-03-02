@@ -8,6 +8,7 @@ import { TopSellingProducts } from "@/components/dashboard/TopSellingProducts";
 import { OrderStatusChart } from "@/components/dashboard/OrderStatusChart";
 import { TransactionHistory } from "@/components/analytics/TransactionHistory";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { RecentOrders } from "@/components/dashboard/RecentOrders";
 
 const Analytics = () => {
   const isMobile = useIsMobile();
@@ -15,7 +16,7 @@ const Analytics = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">View detailed performance metrics for your store.</p>
       </div>
       
@@ -31,7 +32,8 @@ const Analytics = () => {
           <div className={`grid ${isMobile ? 'grid-cols-1 gap-5' : 'grid-cols-4 gap-6'}`}>
             <SalesChart />
             <TopSellingProducts />
-            <OrderStatusChart />
+            <RecentOrders />
+            
           </div>
         </TabsContent>
         

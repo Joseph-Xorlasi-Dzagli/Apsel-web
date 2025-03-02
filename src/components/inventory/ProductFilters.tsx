@@ -27,25 +27,23 @@ export function ProductFilters({
 
   return (
     <div className="space-y-4">
-      <div className="relative w-full sm:w-64 mb-4">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-        <Input
-          placeholder="Search products..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-9"
-        />
-      </div>
-      
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row  gap-4">
+        <div className="relative w-full sm:w-64 h-full pt-6 mr-8">
+          <Search className="absolute left-3 bottom-3 text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9"
+          />
+        </div>
         <div>
           <h3 className="mb-2 text-sm font-medium">Category</h3>
           <div className="flex flex-wrap gap-2">
             <Button
               variant={categoryFilter === "all" ? "default" : "outline"}
               size="sm"
-              onClick={() => setCategoryFilter("all")}
-            >
+              onClick={() => setCategoryFilter("all")}>
               All
             </Button>
             {categories.map((category) => (
@@ -53,8 +51,7 @@ export function ProductFilters({
                 key={category}
                 variant={categoryFilter === category ? "default" : "outline"}
                 size="sm"
-                onClick={() => setCategoryFilter(category)}
-              >
+                onClick={() => setCategoryFilter(category)}>
                 {category}
               </Button>
             ))}
@@ -67,22 +64,19 @@ export function ProductFilters({
             <Button
               variant={sortBy === "name" ? "default" : "outline"}
               size="sm"
-              onClick={() => setSortBy("name")}
-            >
+              onClick={() => setSortBy("name")}>
               Name
             </Button>
             <Button
               variant={sortBy === "price" ? "default" : "outline"}
               size="sm"
-              onClick={() => setSortBy("price")}
-            >
+              onClick={() => setSortBy("price")}>
               Price
             </Button>
             <Button
               variant={sortBy === "stock" ? "default" : "outline"}
               size="sm"
-              onClick={() => setSortBy("stock")}
-            >
+              onClick={() => setSortBy("stock")}>
               Stock
             </Button>
           </div>

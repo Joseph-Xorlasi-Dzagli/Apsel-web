@@ -72,7 +72,7 @@ export function Categories({ viewMode = "list" }: CategoriesProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center pt-6 mb-4 ">
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
@@ -101,7 +101,9 @@ export function Categories({ viewMode = "list" }: CategoriesProps) {
                     <div className="flex items-center gap-3">
                       <Avatar className="h-9 w-9">
                         <AvatarImage src={category.image} alt={category.name} />
-                        <AvatarFallback>{category.name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback>
+                          {category.name.charAt(0)}
+                        </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium">{category.name}</p>
@@ -116,15 +118,13 @@ export function Categories({ viewMode = "list" }: CategoriesProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleEdit(category.id)}
-                      >
+                        onClick={() => handleEdit(category.id)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDelete(category.id)}
-                      >
+                        onClick={() => handleDelete(category.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -137,12 +137,14 @@ export function Categories({ viewMode = "list" }: CategoriesProps) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {currentCategories.map((category) => (
-            <Card key={category.id} className="hover:shadow-md transition-shadow">
+            <Card
+              key={category.id}
+              className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="h-16 w-16 rounded-full overflow-hidden bg-muted/50">
-                    <img 
-                      src={category.image} 
+                    <img
+                      src={category.image}
                       alt={category.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -153,15 +155,16 @@ export function Categories({ viewMode = "list" }: CategoriesProps) {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold">{category.name}</h3>
-                    <p className="text-sm text-muted-foreground">{category.productCount} products</p>
+                    <p className="text-sm text-muted-foreground">
+                      {category.productCount} products
+                    </p>
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleEdit(category.id)}
-                  >
+                    onClick={() => handleEdit(category.id)}>
                     <Pencil className="h-4 w-4 mr-2" />
                     Edit
                   </Button>
@@ -169,8 +172,7 @@ export function Categories({ viewMode = "list" }: CategoriesProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => handleDelete(category.id)}
-                    className="text-destructive hover:text-destructive"
-                  >
+                    className="text-destructive hover:text-destructive">
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete
                   </Button>
@@ -195,7 +197,9 @@ export function Categories({ viewMode = "list" }: CategoriesProps) {
                     }
                   }}
                   aria-disabled={currentPage === 1}
-                  className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                  className={
+                    currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                  }
                 />
               </PaginationItem>
               {Array.from({ length: totalPages }).map((_, index) => (
@@ -206,8 +210,7 @@ export function Categories({ viewMode = "list" }: CategoriesProps) {
                       e.preventDefault();
                       setCurrentPage(index + 1);
                     }}
-                    isActive={currentPage === index + 1}
-                  >
+                    isActive={currentPage === index + 1}>
                     {index + 1}
                   </PaginationLink>
                 </PaginationItem>
@@ -222,7 +225,11 @@ export function Categories({ viewMode = "list" }: CategoriesProps) {
                     }
                   }}
                   aria-disabled={currentPage === totalPages}
-                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                  className={
+                    currentPage === totalPages
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
                 />
               </PaginationItem>
             </PaginationContent>

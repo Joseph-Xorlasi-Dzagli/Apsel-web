@@ -3,18 +3,29 @@ import React from "react";
 import { Receipt } from "lucide-react";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+
 
 const BillingHistory = () => {
+  const navigate = useNavigate();
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Billing History</CardTitle>
-          <CardDescription>View your recent billing transactions</CardDescription>
+          <CardDescription>
+            View your recent billing transactions
+          </CardDescription>
         </div>
-        <Button variant="outline" size="sm" className="flex items-center gap-1">
-          <Receipt className="h-4 w-4" />
-          <span>Download All</span>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1"
+          onClick={() => navigate("/billing/history")}
+          >
+          {" "}
+          {/* <Receipt className="h-4 w-4" /> */}
+          <span>View All</span>
         </Button>
       </CardHeader>
       <CardContent>

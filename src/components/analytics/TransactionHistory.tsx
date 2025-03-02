@@ -140,8 +140,8 @@ export function TransactionHistory() {
   };
   
   return (
-    <Card className="w-full">
-      <CardHeader>
+    <Card className="w-full border-none p-0">
+      <CardHeader className='p-0'>
         <div className="flex flex-col md:flex-row justify-between gap-4">
           <div>
             <CardTitle>Transaction History</CardTitle>
@@ -192,7 +192,7 @@ export function TransactionHistory() {
           </Tabs>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className='mt-4 p-0'>
         {groupedData.grouped ? (
           <div className="rounded-md border">
             <div className="overflow-x-auto">

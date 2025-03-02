@@ -87,8 +87,8 @@ export function Sidebar() {
         <SidebarItem 
           icon={<LayoutDashboard size={20} />} 
           label="Dashboard" 
-          path="/" 
-          active={location.pathname === "/"} 
+          path="/analytics" 
+          active={location.pathname === "/analytics"} 
           onClick={closeMobileMenu}
         />
         <SidebarItem 
@@ -105,20 +105,20 @@ export function Sidebar() {
           active={location.pathname.startsWith("/inventory")} 
           onClick={closeMobileMenu}
         />
-        <SidebarItem 
+        {/* <SidebarItem 
           icon={<BarChart3 size={20} />} 
           label="Analytics" 
           path="/analytics" 
           active={location.pathname.startsWith("/analytics")} 
           onClick={closeMobileMenu}
-        />
-        <SidebarItem 
+        /> */}
+        {/* <SidebarItem 
           icon={<LineChart size={20} />} 
           label="Sales Chart" 
           path="/sales-chart" 
           active={location.pathname.startsWith("/sales-chart")} 
           onClick={closeMobileMenu}
-        />
+        /> */}
         <SidebarItem 
           icon={<Store size={20} />} 
           label="Business Hub" 

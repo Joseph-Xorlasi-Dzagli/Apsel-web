@@ -193,110 +193,115 @@ const Notifications = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
-        <p className="text-muted-foreground">
-          Manage your notifications and stay updated
-        </p>
-      </div>
-
-      <Card>
-        <CardHeader className="flex flex-col md:flex-row justify-between md:items-center space-y-2 md:space-y-0">
-          <div>
-            <CardTitle>Notification Center</CardTitle>
-            <CardDescription>
-              View and manage your notifications
-            </CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1">
-                  <Filter size={16} />
-                  <span>Filter</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-56 p-4">
-                <div className="space-y-3">
-                  <h4 className="font-medium text-sm">Filter by type</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="order" 
-                        checked={filters.order}
-                        onCheckedChange={() => toggleFilter("order")}
-                      />
-                      <label htmlFor="order" className="text-sm font-medium">
-                        Orders
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="inventory" 
-                        checked={filters.inventory}
-                        onCheckedChange={() => toggleFilter("inventory")}
-                      />
-                      <label htmlFor="inventory" className="text-sm font-medium">
-                        Inventory
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="system" 
-                        checked={filters.system}
-                        onCheckedChange={() => toggleFilter("system")}
-                      />
-                      <label htmlFor="system" className="text-sm font-medium">
-                        System
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="promotion" 
-                        checked={filters.promotion}
-                        onCheckedChange={() => toggleFilter("promotion")}
-                      />
-                      <label htmlFor="promotion" className="text-sm font-medium">
-                        Promotions
-                      </label>
-                    </div>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
+          <p className="text-muted-foreground">
+            Manage your notifications and stay updated
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1">
+                <Filter size={16} />
+                <span>Filter</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-4">
+              <div className="space-y-3">
+                <h4 className="font-medium text-sm">Filter by type</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="order"
+                      checked={filters.order}
+                      onCheckedChange={() => toggleFilter("order")}
+                    />
+                    <label htmlFor="order" className="text-sm font-medium">
+                      Orders
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="inventory"
+                      checked={filters.inventory}
+                      onCheckedChange={() => toggleFilter("inventory")}
+                    />
+                    <label htmlFor="inventory" className="text-sm font-medium">
+                      Inventory
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="system"
+                      checked={filters.system}
+                      onCheckedChange={() => toggleFilter("system")}
+                    />
+                    <label htmlFor="system" className="text-sm font-medium">
+                      System
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="promotion"
+                      checked={filters.promotion}
+                      onCheckedChange={() => toggleFilter("promotion")}
+                    />
+                    <label htmlFor="promotion" className="text-sm font-medium">
+                      Promotions
+                    </label>
                   </div>
                 </div>
-              </PopoverContent>
-            </Popover>
-            <Button variant="outline" size="sm" onClick={markAllAsRead} className="gap-1">
-              <Check size={16} />
-              <span>Mark all as read</span>
-            </Button>
-            <Button variant="outline" size="sm" onClick={clearAllNotifications} className="gap-1">
-              <Trash2 size={16} />
-              <span>Clear all</span>
-            </Button>
-          </div>
-        </CardHeader>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={markAllAsRead}
+            className="gap-1">
+            <Check size={16} />
+            <span>Mark all as read</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={clearAllNotifications}
+            className="gap-1">
+            <Trash2 size={16} />
+            <span>Clear all</span>
+          </Button>
+        </div>
+      </div>
+
+      <Card className="border-none">
         <CardContent>
           <Tabs defaultValue="all" onValueChange={setActiveTab}>
-            <TabsList className={`w-full grid ${isMobile ? "grid-cols-3" : "grid-cols-3 w-[400px] mx-auto"} mb-4`}>
+            <TabsList
+              className={`w-full grid ${
+                isMobile ? "grid-cols-3" : "grid-cols-3 w-[400px] mx-auto"
+              } mb-4`}>
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="unread">
                 Unread
-                {notifications.filter(n => !n.isRead).length > 0 && (
+                {notifications.filter((n) => !n.isRead).length > 0 && (
                   <Badge variant="secondary" className="ml-1">
-                    {notifications.filter(n => !n.isRead).length}
+                    {notifications.filter((n) => !n.isRead).length}
                   </Badge>
                 )}
               </TabsTrigger>
               <TabsTrigger value="read">Read</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="all" className="mt-0">
               {renderNotificationList(filteredNotifications)}
             </TabsContent>
-            
+
             <TabsContent value="unread" className="mt-0">
               {renderNotificationList(filteredNotifications)}
             </TabsContent>
-            
+
             <TabsContent value="read" className="mt-0">
               {renderNotificationList(filteredNotifications)}
             </TabsContent>
