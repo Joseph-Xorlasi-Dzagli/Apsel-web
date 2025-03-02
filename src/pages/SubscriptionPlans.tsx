@@ -16,10 +16,10 @@ const SubscriptionPlans = () => {
   };
 
   const planFeatures = [
-    "Unlock all puzzles",
+    "Unlock all features",
     "Only $.56 a week",
     "Unlimited access with no ads",
-    "New puzzles added daily"
+    "New features added daily"
   ];
 
   const plans = [

@@ -179,7 +179,7 @@ export function OrderList({
             <PaginationItem>
               <PaginationPrevious
                 onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
             {Array.from({ length: totalPages }).map((_, index) => (
@@ -197,7 +197,7 @@ export function OrderList({
                 onClick={() =>
                   onPageChange(Math.min(totalPages, currentPage + 1))
                 }
-                disabled={currentPage === totalPages}
+                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
           </PaginationContent>
