@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronLeft, Upload, X, Edit, Trash2 } from "lucide-react";
+import { Upload, Edit, Trash2, PackageOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 
@@ -17,7 +17,6 @@ type Mode = "view" | "edit" | "add";
 interface ProductDetailsProps {
   product: Product | null;
   mode: Mode;
-  onClose: () => void;
   onSave: (product: Product) => void;
   onDelete?: (productId: string) => void;
   onModeChange: (mode: Mode) => void;
@@ -26,7 +25,6 @@ interface ProductDetailsProps {
 export function ProductDetails({
   product,
   mode,
-  onClose,
   onSave,
   onDelete,
   onModeChange,
@@ -48,6 +46,27 @@ export function ProductDetails({
     }
   );
 
+  // Update formData when product changes
+  useState(() => {
+    if (product) {
+      setFormData(product);
+    } else if (mode === "add") {
+      setFormData({
+        id: `prod-${Date.now()}`,
+        name: "",
+        price: 0,
+        stock: 0,
+        image: "",
+        category: "",
+        sold: 0,
+        description: "",
+        termsOfService: "",
+        availableForDelivery: false,
+        availableForPickup: true,
+      });
+    }
+  });
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -65,21 +84,11 @@ export function ProductDetails({
 
   const handleSave = () => {
     onSave(formData);
-    toast({
-      title: "Success",
-      description: `Product ${mode === "add" ? "added" : "updated"} successfully!`,
-    });
-    onClose();
   };
 
   const handleDelete = () => {
     if (onDelete && product) {
       onDelete(product.id);
-      toast({
-        title: "Success",
-        description: "Product deleted successfully!",
-      });
-      onClose();
     }
   };
 
@@ -90,22 +99,31 @@ export function ProductDetails({
     });
   };
 
-  if (!product && mode !== "add") return null;
+  if (!product && mode !== "add") {
+    return (
+      <Card className="h-full overflow-auto">
+        <CardHeader className="sticky top-0 z-10 bg-card pb-4">
+          <CardTitle>Product Details</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center justify-center h-[calc(100%-64px)]">
+          <PackageOpen className="h-16 w-16 text-muted-foreground mb-4" />
+          <p className="text-center text-muted-foreground">
+            Select a product to view its details or click Add New Product to create one.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="h-full overflow-auto">
       <CardHeader className="sticky top-0 z-10 bg-card pb-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <CardTitle>
-              {mode === "view" && "Product"}
-              {mode === "edit" && "Edit Product"}
-              {mode === "add" && "Add Product"}
-            </CardTitle>
-          </div>
+          <CardTitle>
+            {mode === "view" && (formData.name || "Product Details")}
+            {mode === "edit" && "Edit " + (formData.name || "Product")}
+            {mode === "add" && "Add New Product"}
+          </CardTitle>
           {mode === "view" && (
             <Button 
               variant="ghost" 
@@ -147,7 +165,6 @@ export function ProductDetails({
             </div>
 
             <div>
-              <h2 className="text-2xl font-bold">{formData.name}</h2>
               <div className="flex items-center gap-1 mt-1 text-muted-foreground">
                 {formData.availableForDelivery && formData.availableForPickup ? (
                   <span>Delivery & Pickup</span>

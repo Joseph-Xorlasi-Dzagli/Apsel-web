@@ -14,14 +14,12 @@ const Inventory = () => {
   const [viewMode, setViewMode] = useState<"list" | "tile">("list");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [detailsMode, setDetailsMode] = useState<"view" | "edit" | "add">("view");
-  const [showDetails, setShowDetails] = useState(false);
   const { toast } = useToast();
 
   const handleAddNew = () => {
     if (activeTab === "products") {
       setDetailsMode("add");
       setSelectedProduct(null);
-      setShowDetails(true);
     } else {
       toast({
         title: "Add New Category",
@@ -33,7 +31,6 @@ const Inventory = () => {
   const handleProductSelect = (product: Product) => {
     setSelectedProduct(product);
     setDetailsMode("view");
-    setShowDetails(true);
   };
 
   const handleProductSave = (product: Product) => {
@@ -42,7 +39,6 @@ const Inventory = () => {
       title: "Success",
       description: `Product ${detailsMode === "add" ? "added" : "updated"} successfully!`,
     });
-    setShowDetails(false);
   };
 
   const handleProductDelete = (productId: string) => {
@@ -51,11 +47,7 @@ const Inventory = () => {
       title: "Success",
       description: "Product deleted successfully!",
     });
-    setShowDetails(false);
-  };
-
-  const handleCloseDetails = () => {
-    setShowDetails(false);
+    setSelectedProduct(null);
   };
 
   return (
@@ -92,7 +84,7 @@ const Inventory = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className={showDetails ? "col-span-2 lg:block hidden" : "col-span-3"}>
+        <div className="col-span-2">
           <Tabs defaultValue="products" onValueChange={(value) => setActiveTab(value as "products" | "categories")}>
             <TabsList className="grid w-full grid-cols-2 sm:w-[400px]">
               <TabsTrigger value="products">Products</TabsTrigger>
@@ -107,18 +99,15 @@ const Inventory = () => {
           </Tabs>
         </div>
 
-        {showDetails && (
-          <div className="col-span-3 lg:col-span-1 h-[calc(100vh-12rem)] overflow-auto">
-            <ProductDetails
-              product={selectedProduct}
-              mode={detailsMode}
-              onClose={handleCloseDetails}
-              onSave={handleProductSave}
-              onDelete={handleProductDelete}
-              onModeChange={setDetailsMode}
-            />
-          </div>
-        )}
+        <div className="col-span-3 lg:col-span-1 h-[calc(100vh-12rem)] overflow-auto">
+          <ProductDetails
+            product={selectedProduct}
+            mode={detailsMode}
+            onSave={handleProductSave}
+            onDelete={handleProductDelete}
+            onModeChange={setDetailsMode}
+          />
+        </div>
       </div>
     </div>
   );
