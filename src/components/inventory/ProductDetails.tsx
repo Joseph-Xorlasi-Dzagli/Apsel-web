@@ -1,13 +1,12 @@
-import { useState, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { Product } from "@/lib/data";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, Edit, Trash2, PackageOpen, ArrowLeft } from "lucide-react";
+import { Upload, Edit, Trash2, PackageOpen, ArrowLeft, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 
@@ -19,6 +18,7 @@ interface ProductDetailsProps {
   onSave: (product: Product) => void;
   onDelete?: (productId: string) => void;
   onModeChange: (mode: Mode) => void;
+  onClose?: () => void;
 }
 
 export function ProductDetails({
@@ -27,6 +27,7 @@ export function ProductDetails({
   onSave,
   onDelete,
   onModeChange,
+  onClose,
 }: ProductDetailsProps) {
   const { toast } = useToast();
   const [formData, setFormData] = useState<Product>(
@@ -45,7 +46,7 @@ export function ProductDetails({
     }
   );
 
-  useState(() => {
+  useEffect(() => {
     if (product) {
       setFormData(product);
     } else if (mode === "add") {
@@ -63,7 +64,7 @@ export function ProductDetails({
         availableForPickup: true,
       });
     }
-  });
+  }, [product, mode]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -87,6 +88,14 @@ export function ProductDetails({
   const handleDelete = () => {
     if (onDelete && product) {
       onDelete(product.id);
+    }
+  };
+
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    } else if (product) {
+      onModeChange("view");
     }
   };
 
@@ -131,14 +140,25 @@ export function ProductDetails({
               EDIT
             </Button>
           )}
-          {mode === "edit" && (
-            <Button 
-              variant="ghost" 
-              className="text-red-500 hover:text-red-600 hover:bg-red-50"
-              onClick={handleDelete}
-            >
-              DELETE
-            </Button>
+          {(mode === "edit" || mode === "add") && (
+            <div className="flex gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={handleClose}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              {mode === "edit" && (
+                <Button 
+                  variant="ghost" 
+                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                  onClick={handleDelete}
+                >
+                  DELETE
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </CardHeader>

@@ -50,6 +50,15 @@ const Inventory = () => {
     setSelectedProduct(null);
   };
 
+  const handleCloseDetails = () => {
+    if (detailsMode === "add") {
+      setSelectedProduct(null);
+      setDetailsMode("view");
+    } else if (detailsMode === "edit" && selectedProduct) {
+      setDetailsMode("view");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
@@ -99,17 +108,16 @@ const Inventory = () => {
           </Tabs>
         </div>
 
-        {(selectedProduct || detailsMode === "add") && (
-          <div className="col-span-3 lg:col-span-1 h-[calc(100vh-12rem)] overflow-auto">
-            <ProductDetails
-              product={selectedProduct}
-              mode={detailsMode}
-              onSave={handleProductSave}
-              onDelete={handleProductDelete}
-              onModeChange={setDetailsMode}
-            />
-          </div>
-        )}
+        <div className="col-span-3 lg:col-span-1 h-[calc(100vh-12rem)] overflow-auto">
+          <ProductDetails
+            product={selectedProduct}
+            mode={detailsMode}
+            onSave={handleProductSave}
+            onDelete={handleProductDelete}
+            onModeChange={setDetailsMode}
+            onClose={handleCloseDetails}
+          />
+        </div>
       </div>
     </div>
   );

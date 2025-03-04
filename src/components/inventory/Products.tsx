@@ -13,7 +13,7 @@ import {
   CardContent
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Eye } from "lucide-react";
 import { ProductFilters } from "./ProductFilters";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -40,24 +40,16 @@ export function Products({ viewMode = "list", onProductSelect }: ProductsProps) 
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 9;
 
-  const handleEdit = (e: React.MouseEvent, product: Product) => {
+  const handleView = (e: React.MouseEvent, product: Product) => {
     e.stopPropagation();
     if (onProductSelect) {
       onProductSelect(product);
     } else {
       toast({
-        title: "Edit Product",
-        description: `Editing product with ID: ${product.id} will be available soon!`,
+        title: "View Product",
+        description: `Viewing product: ${product.name}`,
       });
     }
-  };
-
-  const handleDelete = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    toast({
-      title: "Delete Product",
-      description: `Deleting product with ID: ${id} will be available soon!`,
-    });
   };
 
   const handleProductClick = (product: Product) => {
@@ -152,20 +144,13 @@ export function Products({ viewMode = "list", onProductSelect }: ProductsProps) 
                   <TableCell className="text-right">{product.stock}</TableCell>
                   <TableCell className="text-right">{product.sold}</TableCell>
                   <TableCell>
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-end">
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={(e) => handleEdit(e, product)}
+                        onClick={(e) => handleView(e, product)}
                       >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => handleDelete(e, product.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
+                        <Eye className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>
@@ -211,22 +196,14 @@ export function Products({ viewMode = "list", onProductSelect }: ProductsProps) 
                       <p className="text-sm text-muted-foreground">Sold</p>
                       <p className="font-medium">{product.sold} items</p>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center">
                       <Button
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={(e) => handleEdit(e, product)}
+                        onClick={(e) => handleView(e, product)}
                       >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={(e) => handleDelete(e, product.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
+                        <Eye className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
