@@ -23,6 +23,20 @@ export interface Product {
   termsOfService?: string;
   availableForDelivery?: boolean;
   availableForPickup?: boolean;
+  options?: ProductOption[];
+}
+
+export interface ProductOption {
+  id: string;
+  productId: string;
+  name: string;
+  price: number;
+  stock: number;
+  image?: string;
+  description?: string;
+  termsOfService?: string;
+  availableForDelivery?: boolean;
+  availableForPickup?: boolean;
 }
 
 export interface Category {
@@ -129,22 +143,80 @@ export const generateRandomProducts = (count: number): Product[] => {
     'All sales are final. Please check specifications before purchasing.',
     'Warranty void if product is tampered with or misused.'
   ];
+
+  const optionNames = [
+    'Standard',
+    'Extra Memory',
+    'Premium',
+    'Extra Cheese',
+    'Spicy',
+    'Large Size',
+    'Medium Size',
+    'Small Size',
+    'Deluxe',
+    'Basic'
+  ];
   
   const result: Product[] = [];
   
   for (let i = 0; i < count; i++) {
+    const productName = products[Math.floor(Math.random() * products.length)];
+    const basePrice = parseFloat((Math.random() * 500 + 20).toFixed(2));
+    const baseStock = Math.floor(Math.random() * 100) + 5;
+    const productId = `prod-${i + 1}`;
+    
+    // Generate 1-4 options per product
+    const options: ProductOption[] = [];
+    const numOptions = Math.floor(Math.random() * 3) + 1;
+    
+    // First option is always 'Standard'
+    options.push({
+      id: `option-${productId}-1`,
+      productId,
+      name: 'Standard',
+      price: basePrice,
+      stock: baseStock,
+      image: `/public/lovable-uploads/${Math.floor(Math.random() * 20) + 1}2345678-abcd-4ef5-6789-abcdef123456.png`,
+      description: descriptions[Math.floor(Math.random() * descriptions.length)],
+      termsOfService: termsOfService[Math.floor(Math.random() * termsOfService.length)],
+      availableForDelivery: Math.random() > 0.3,
+      availableForPickup: Math.random() > 0.2
+    });
+    
+    // Add additional options
+    for (let j = 1; j < numOptions; j++) {
+      const optionName = optionNames[Math.floor(Math.random() * optionNames.length)];
+      if (optionName === 'Standard' || options.some(opt => opt.name === optionName)) {
+        continue; // Skip duplicates
+      }
+      
+      options.push({
+        id: `option-${productId}-${j+1}`,
+        productId,
+        name: optionName,
+        price: basePrice + parseFloat((Math.random() * 50).toFixed(2)), // Slightly higher price for options
+        stock: Math.max(5, baseStock - Math.floor(Math.random() * 20)), // Slightly less stock for options
+        image: `/public/lovable-uploads/${Math.floor(Math.random() * 20) + 1}2345678-abcd-4ef5-6789-abcdef123456.png`,
+        description: descriptions[Math.floor(Math.random() * descriptions.length)],
+        termsOfService: termsOfService[Math.floor(Math.random() * termsOfService.length)],
+        availableForDelivery: Math.random() > 0.3,
+        availableForPickup: Math.random() > 0.2
+      });
+    }
+    
     result.push({
-      id: `prod-${i + 1}`,
-      name: products[Math.floor(Math.random() * products.length)],
-      price: parseFloat((Math.random() * 500 + 20).toFixed(2)),
-      stock: Math.floor(Math.random() * 100) + 5,
+      id: productId,
+      name: productName,
+      price: basePrice,
+      stock: baseStock,
       image: `/public/lovable-uploads/${Math.floor(Math.random() * 20) + 1}2345678-abcd-4ef5-6789-abcdef123456.png`,
       category: categories[Math.floor(Math.random() * categories.length)],
       sold: Math.floor(Math.random() * 200),
       description: descriptions[Math.floor(Math.random() * descriptions.length)],
       termsOfService: termsOfService[Math.floor(Math.random() * termsOfService.length)],
       availableForDelivery: Math.random() > 0.3,
-      availableForPickup: Math.random() > 0.2
+      availableForPickup: Math.random() > 0.2,
+      options
     });
   }
   

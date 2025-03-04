@@ -6,13 +6,14 @@ import { Categories } from "@/components/inventory/Categories";
 import { Button } from "@/components/ui/button";
 import { Plus, Grid, List as ListIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Product, sampleProducts } from "@/lib/data";
+import { Product, ProductOption, sampleProducts } from "@/lib/data";
 import { ProductDetails } from "@/components/inventory/ProductDetails";
 
 const Inventory = () => {
   const [activeTab, setActiveTab] = useState<"products" | "categories">("products");
   const [viewMode, setViewMode] = useState<"list" | "tile">("list");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedOption, setSelectedOption] = useState<ProductOption | null>(null);
   const [detailsMode, setDetailsMode] = useState<"view" | "edit" | "add">("view");
   const { toast } = useToast();
 
@@ -20,6 +21,7 @@ const Inventory = () => {
     if (activeTab === "products") {
       setDetailsMode("add");
       setSelectedProduct(null);
+      setSelectedOption(null);
     } else {
       toast({
         title: "Add New Category",
@@ -30,15 +32,51 @@ const Inventory = () => {
 
   const handleProductSelect = (product: Product) => {
     setSelectedProduct(product);
+    // Select the standard option by default
+    const standardOption = product.options?.find(opt => opt.name === "Standard") || product.options?.[0] || null;
+    setSelectedOption(standardOption);
     setDetailsMode("view");
   };
 
-  const handleProductSave = (product: Product) => {
+  const handleOptionSelect = (option: ProductOption) => {
+    setSelectedOption(option);
+    setDetailsMode("view");
+  };
+
+  const handleAddOption = () => {
+    if (!selectedProduct) return;
+    setSelectedOption(null);
+    setDetailsMode("add");
+  };
+
+  const handleProductSave = (updatedProduct: Product) => {
     // In a real app, this would update the backend
     toast({
       title: "Success",
       description: `Product ${detailsMode === "add" ? "added" : "updated"} successfully!`,
     });
+  };
+
+  const handleOptionSave = (option: ProductOption) => {
+    // In a real app, this would update the backend
+    toast({
+      title: "Success",
+      description: `Product option ${detailsMode === "add" ? "added" : "updated"} successfully!`,
+    });
+    
+    if (detailsMode === "add" && selectedProduct) {
+      // Simulate adding the option to the product
+      const newOption: ProductOption = {
+        ...option,
+        id: `option-${Date.now()}`,
+        productId: selectedProduct.id,
+      };
+      setSelectedOption(newOption);
+      setDetailsMode("view");
+    } else if (detailsMode === "edit") {
+      setSelectedOption(option);
+      setDetailsMode("view");
+    }
   };
 
   const handleProductDelete = (productId: string) => {
@@ -48,13 +86,46 @@ const Inventory = () => {
       description: "Product deleted successfully!",
     });
     setSelectedProduct(null);
+    setSelectedOption(null);
+  };
+
+  const handleOptionDelete = (optionId: string) => {
+    // In a real app, this would delete from the backend
+    toast({
+      title: "Success",
+      description: "Product option deleted successfully!",
+    });
+    
+    if (selectedProduct && selectedProduct.options) {
+      // If we delete the currently selected option, select the standard one instead
+      const standardOption = selectedProduct.options.find(opt => opt.name === "Standard" && opt.id !== optionId);
+      if (standardOption) {
+        setSelectedOption(standardOption);
+      } else if (selectedProduct.options.length > 1) {
+        // If no standard option, select the first one that's not the deleted one
+        const firstOption = selectedProduct.options.find(opt => opt.id !== optionId);
+        setSelectedOption(firstOption || null);
+      } else {
+        setSelectedOption(null);
+      }
+    }
   };
 
   const handleCloseDetails = () => {
     if (detailsMode === "add") {
-      setSelectedProduct(null);
-      setDetailsMode("view");
-    } else if (detailsMode === "edit" && selectedProduct) {
+      // If adding a new product, clear everything
+      if (!selectedProduct) {
+        setSelectedProduct(null);
+        setSelectedOption(null);
+        setDetailsMode("view");
+      } else {
+        // If adding an option, go back to view mode for the selected product
+        setDetailsMode("view");
+        if (selectedProduct && selectedProduct.options?.length) {
+          setSelectedOption(selectedProduct.options[0]);
+        }
+      }
+    } else if (detailsMode === "edit" && selectedOption) {
       setDetailsMode("view");
     }
   };
@@ -111,11 +182,14 @@ const Inventory = () => {
         <div className="col-span-3 lg:col-span-1 h-[calc(100vh-12rem)] overflow-auto">
           <ProductDetails
             product={selectedProduct}
+            productOption={selectedOption}
             mode={detailsMode}
-            onSave={handleProductSave}
-            onDelete={handleProductDelete}
+            onSave={handleOptionSave}
+            onDelete={handleOptionDelete}
             onModeChange={setDetailsMode}
             onClose={handleCloseDetails}
+            onAddOption={handleAddOption}
+            onOptionSelect={handleOptionSelect}
           />
         </div>
       </div>
