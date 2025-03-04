@@ -24,14 +24,15 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { sampleProducts } from "@/lib/data";
+import { sampleProducts, Product } from "@/lib/data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ProductsProps {
   viewMode?: "list" | "tile";
+  onProductSelect?: (product: Product) => void;
 }
 
-export function Products({ viewMode = "list" }: ProductsProps) {
+export function Products({ viewMode = "list", onProductSelect }: ProductsProps) {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -39,18 +40,30 @@ export function Products({ viewMode = "list" }: ProductsProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 9;
 
-  const handleEdit = (id: string) => {
-    toast({
-      title: "Edit Product",
-      description: `Editing product with ID: ${id} will be available soon!`,
-    });
+  const handleEdit = (e: React.MouseEvent, product: Product) => {
+    e.stopPropagation();
+    if (onProductSelect) {
+      onProductSelect(product);
+    } else {
+      toast({
+        title: "Edit Product",
+        description: `Editing product with ID: ${product.id} will be available soon!`,
+      });
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
     toast({
       title: "Delete Product",
       description: `Deleting product with ID: ${id} will be available soon!`,
     });
+  };
+
+  const handleProductClick = (product: Product) => {
+    if (onProductSelect) {
+      onProductSelect(product);
+    }
   };
 
   // Filter and sort products
@@ -120,7 +133,11 @@ export function Products({ viewMode = "list" }: ProductsProps) {
             </TableHeader>
             <TableBody>
               {currentProducts.map((product) => (
-                <TableRow key={product.id} className="hover:bg-muted/50">
+                <TableRow 
+                  key={product.id} 
+                  className="hover:bg-muted/50 cursor-pointer"
+                  onClick={() => handleProductClick(product)}
+                >
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-9 w-9">
@@ -139,14 +156,14 @@ export function Products({ viewMode = "list" }: ProductsProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleEdit(product.id)}
+                        onClick={(e) => handleEdit(e, product)}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDelete(product.id)}
+                        onClick={(e) => handleDelete(e, product.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -160,7 +177,11 @@ export function Products({ viewMode = "list" }: ProductsProps) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {currentProducts.map((product) => (
-            <Card key={product.id} className="hover:shadow-md transition-shadow">
+            <Card 
+              key={product.id} 
+              className="hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => handleProductClick(product)}
+            >
               <CardContent className="p-4">
                 <div className="aspect-square w-full relative mb-4 bg-muted/50 rounded-md overflow-hidden">
                   <img
@@ -195,7 +216,7 @@ export function Products({ viewMode = "list" }: ProductsProps) {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => handleEdit(product.id)}
+                        onClick={(e) => handleEdit(e, product)}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -203,7 +224,7 @@ export function Products({ viewMode = "list" }: ProductsProps) {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => handleDelete(product.id)}
+                        onClick={(e) => handleDelete(e, product.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

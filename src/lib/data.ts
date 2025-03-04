@@ -1,4 +1,3 @@
-
 // Sample data for our application
 export type OrderStatus = 'pending' | 'processing' | 'completed' | 'canceled';
 
@@ -20,6 +19,10 @@ export interface Product {
   image: string;
   category: string;
   sold: number;
+  description?: string;
+  termsOfService?: string;
+  availableForDelivery?: boolean;
+  availableForPickup?: boolean;
 }
 
 export interface Category {
@@ -53,7 +56,6 @@ export type OrderType = {
   notes?: string;
   paymentMethod?: string;
 };
-
 
 export interface Transaction {
   id: string;
@@ -112,6 +114,22 @@ export const generateRandomProducts = (count: number): Product[] => {
     'Screen Protector'
   ];
   
+  const descriptions = [
+    'Premium quality product with 1-year warranty.',
+    'Latest model with enhanced features and performance.',
+    'Durable design with premium materials.',
+    'Best-in-class technology with excellent battery life.',
+    'High-performance device with sleek design.'
+  ];
+  
+  const termsOfService = [
+    'Returns accepted within 14 days of purchase. Product must be in original packaging.',
+    'Limited warranty covers manufacturing defects only. Does not cover accidental damage.',
+    '30-day money-back guarantee. Shipping charges are non-refundable.',
+    'All sales are final. Please check specifications before purchasing.',
+    'Warranty void if product is tampered with or misused.'
+  ];
+  
   const result: Product[] = [];
   
   for (let i = 0; i < count; i++) {
@@ -122,7 +140,11 @@ export const generateRandomProducts = (count: number): Product[] => {
       stock: Math.floor(Math.random() * 100) + 5,
       image: `/public/lovable-uploads/${Math.floor(Math.random() * 20) + 1}2345678-abcd-4ef5-6789-abcdef123456.png`,
       category: categories[Math.floor(Math.random() * categories.length)],
-      sold: Math.floor(Math.random() * 200)
+      sold: Math.floor(Math.random() * 200),
+      description: descriptions[Math.floor(Math.random() * descriptions.length)],
+      termsOfService: termsOfService[Math.floor(Math.random() * termsOfService.length)],
+      availableForDelivery: Math.random() > 0.3,
+      availableForPickup: Math.random() > 0.2
     });
   }
   

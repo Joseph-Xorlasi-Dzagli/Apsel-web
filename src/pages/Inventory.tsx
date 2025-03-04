@@ -6,17 +6,56 @@ import { Categories } from "@/components/inventory/Categories";
 import { Button } from "@/components/ui/button";
 import { Plus, Grid, List as ListIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Product, sampleProducts } from "@/lib/data";
+import { ProductDetails } from "@/components/inventory/ProductDetails";
 
 const Inventory = () => {
   const [activeTab, setActiveTab] = useState<"products" | "categories">("products");
   const [viewMode, setViewMode] = useState<"list" | "tile">("list");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [detailsMode, setDetailsMode] = useState<"view" | "edit" | "add">("view");
+  const [showDetails, setShowDetails] = useState(false);
   const { toast } = useToast();
 
   const handleAddNew = () => {
+    if (activeTab === "products") {
+      setDetailsMode("add");
+      setSelectedProduct(null);
+      setShowDetails(true);
+    } else {
+      toast({
+        title: "Add New Category",
+        description: "This feature will be available soon!",
+      });
+    }
+  };
+
+  const handleProductSelect = (product: Product) => {
+    setSelectedProduct(product);
+    setDetailsMode("view");
+    setShowDetails(true);
+  };
+
+  const handleProductSave = (product: Product) => {
+    // In a real app, this would update the backend
     toast({
-      title: `Add New ${activeTab === "products" ? "Product" : "Category"}`,
-      description: "This feature will be available soon!",
+      title: "Success",
+      description: `Product ${detailsMode === "add" ? "added" : "updated"} successfully!`,
     });
+    setShowDetails(false);
+  };
+
+  const handleProductDelete = (productId: string) => {
+    // In a real app, this would delete from the backend
+    toast({
+      title: "Success",
+      description: "Product deleted successfully!",
+    });
+    setShowDetails(false);
+  };
+
+  const handleCloseDetails = () => {
+    setShowDetails(false);
   };
 
   return (
@@ -52,18 +91,35 @@ const Inventory = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="products" onValueChange={(value) => setActiveTab(value as "products" | "categories")}>
-        <TabsList className="grid w-full grid-cols-2 sm:w-[400px]">
-          <TabsTrigger value="products">Products</TabsTrigger>
-          <TabsTrigger value="categories">Categories</TabsTrigger>
-        </TabsList>
-        <TabsContent value="products" className="mt-6">
-          <Products viewMode={viewMode} />
-        </TabsContent>
-        <TabsContent value="categories" className="mt-6">
-          <Categories viewMode={viewMode} />
-        </TabsContent>
-      </Tabs>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className={showDetails ? "col-span-2 lg:block hidden" : "col-span-3"}>
+          <Tabs defaultValue="products" onValueChange={(value) => setActiveTab(value as "products" | "categories")}>
+            <TabsList className="grid w-full grid-cols-2 sm:w-[400px]">
+              <TabsTrigger value="products">Products</TabsTrigger>
+              <TabsTrigger value="categories">Categories</TabsTrigger>
+            </TabsList>
+            <TabsContent value="products" className="mt-6">
+              <Products viewMode={viewMode} onProductSelect={handleProductSelect} />
+            </TabsContent>
+            <TabsContent value="categories" className="mt-6">
+              <Categories viewMode={viewMode} />
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {showDetails && (
+          <div className="col-span-3 lg:col-span-1 h-[calc(100vh-12rem)] overflow-auto">
+            <ProductDetails
+              product={selectedProduct}
+              mode={detailsMode}
+              onClose={handleCloseDetails}
+              onSave={handleProductSave}
+              onDelete={handleProductDelete}
+              onModeChange={setDetailsMode}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
