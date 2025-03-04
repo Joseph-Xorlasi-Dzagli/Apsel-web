@@ -1,4 +1,3 @@
-
 import { useState, ChangeEvent } from "react";
 import { Product } from "@/lib/data";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -8,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, Edit, Trash2, PackageOpen } from "lucide-react";
+import { Upload, Edit, Trash2, PackageOpen, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 
@@ -46,7 +45,6 @@ export function ProductDetails({
     }
   );
 
-  // Update formData when product changes
   useState(() => {
     if (product) {
       setFormData(product);
@@ -120,8 +118,8 @@ export function ProductDetails({
       <CardHeader className="sticky top-0 z-10 bg-card pb-4">
         <div className="flex items-center justify-between">
           <CardTitle>
-            {mode === "view" && (formData.name || "Product Details")}
-            {mode === "edit" && "Edit " + (formData.name || "Product")}
+            {mode === "view" && "Product Details"}
+            {mode === "edit" && "Edit Product"}
             {mode === "add" && "Add New Product"}
           </CardTitle>
           {mode === "view" && (
@@ -165,6 +163,7 @@ export function ProductDetails({
             </div>
 
             <div>
+              <h3 className="text-lg font-medium">{formData.name}</h3>
               <div className="flex items-center gap-1 mt-1 text-muted-foreground">
                 {formData.availableForDelivery && formData.availableForPickup ? (
                   <span>Delivery & Pickup</span>

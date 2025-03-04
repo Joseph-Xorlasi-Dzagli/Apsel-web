@@ -99,15 +99,17 @@ const Inventory = () => {
           </Tabs>
         </div>
 
-        <div className="col-span-3 lg:col-span-1 h-[calc(100vh-12rem)] overflow-auto">
-          <ProductDetails
-            product={selectedProduct}
-            mode={detailsMode}
-            onSave={handleProductSave}
-            onDelete={handleProductDelete}
-            onModeChange={setDetailsMode}
-          />
-        </div>
+        {(selectedProduct || detailsMode === "add") && (
+          <div className="col-span-3 lg:col-span-1 h-[calc(100vh-12rem)] overflow-auto">
+            <ProductDetails
+              product={selectedProduct}
+              mode={detailsMode}
+              onSave={handleProductSave}
+              onDelete={handleProductDelete}
+              onModeChange={setDetailsMode}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
