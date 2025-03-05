@@ -44,6 +44,7 @@ export interface Category {
   name: string;
   productCount: number;
   image: string;
+  description?: string;
 }
 
 export type OrderItem = {
