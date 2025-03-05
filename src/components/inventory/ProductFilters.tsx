@@ -9,8 +9,8 @@ interface ProductFiltersProps {
   setSearchTerm: (term: string) => void;
   categoryFilter: string;
   setCategoryFilter: (category: string) => void;
-  sortBy: "name" | "price" | "stock";
-  setSortBy: (sortBy: "name" | "price" | "stock") => void;
+  sortBy: "name" | "price" | "stock" | "sold";
+  setSortBy: (sortBy: "name" | "price" | "stock" | "sold") => void;
   categories?: string[];
 }
 
@@ -78,6 +78,12 @@ export function ProductFilters({
               size="sm"
               onClick={() => setSortBy("stock")}>
               Stock
+            </Button>
+            <Button
+              variant={sortBy === "sold" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSortBy("sold")}>
+              Sold
             </Button>
           </div>
         </div>

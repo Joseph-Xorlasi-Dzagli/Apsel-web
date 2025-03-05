@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Table, 
@@ -58,7 +57,7 @@ export function Products({
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<"name" | "price" | "stock">("name");
+  const [sortBy, setSortBy] = useState<"name" | "price" | "stock" | "sold">("name");
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 9;
   const [SelectedproductId, setSelectedproductId] = useState<string | null>(null);
@@ -108,6 +107,8 @@ export function Products({
         return a.name.localeCompare(b.name);
       } else if (sortBy === "price") {
         return a.price - b.price;
+      } else if (sortBy === "sold") {
+        return b.sold - a.sold; // Sort by sold items (descending)
       } else {
         return a.stock - b.stock;
       }
