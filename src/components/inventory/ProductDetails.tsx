@@ -145,16 +145,17 @@ export function ProductDetails({
       <CardHeader className="sticky top-0 z-10 bg-card pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {(mode === "view" || mode === "edit") && (
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => onClose && onClose()}
-                className="mr-1"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            )}
+            {(mode === "view" || mode === "edit") &&
+              mode !== "view" &&
+              product && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onClose && onClose()}
+                  className="mr-1">
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              )}
             <CardTitle>
               {isNewProduct && "Add New Product"}
               {isNewOption && "Add Product Option"}
@@ -163,29 +164,25 @@ export function ProductDetails({
             </CardTitle>
           </div>
           {mode === "view" && (
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="text-orange-500 hover:text-orange-600 hover:bg-orange-50"
-              onClick={() => onModeChange("edit")}
-            >
+              onClick={() => onModeChange("edit")}>
               EDIT
             </Button>
           )}
           {(mode === "edit" || mode === "add") && (
-            <div className="flex gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={handleClose}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+            <div>
+              {mode === "add" && (
+                <Button variant="ghost" size="icon" onClick={handleClose}>
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
               {mode === "edit" && (
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                  onClick={handleDelete}
-                >
+                  onClick={handleDelete}>
                   DELETE
                 </Button>
               )}
@@ -197,9 +194,13 @@ export function ProductDetails({
         {mode === "view" ? (
           <>
             <div className="relative">
-              <AspectRatio ratio={16 / 9} className="bg-muted rounded-md overflow-hidden">
+              <AspectRatio
+                ratio={16 / 9}
+                className="bg-muted rounded-md overflow-hidden">
                 <img
-                  src={productOption?.image || product?.image || "/placeholder.svg"}
+                  src={
+                    productOption?.image || product?.image || "/placeholder.svg"
+                  }
                   alt={productOption?.name || product?.name}
                   className="object-cover w-full h-full"
                   onError={(e) => {
@@ -215,11 +216,15 @@ export function ProductDetails({
 
             <div>
               <h3 className="text-lg font-medium">
-                {product?.name}{productOption?.name !== 'Standard' && productOption?.name ? `: ${productOption.name}` : ''}
+                {product?.name}
+                {productOption?.name !== "Standard" && productOption?.name
+                  ? `: ${productOption.name}`
+                  : ""}
               </h3>
               <div className="flex items-center gap-1 mt-1 text-muted-foreground">
                 {productOption ? (
-                  productOption.availableForDelivery && productOption.availableForPickup ? (
+                  productOption.availableForDelivery &&
+                  productOption.availableForPickup ? (
                     <span>Delivery & Pickup</span>
                   ) : productOption.availableForDelivery ? (
                     <span>Delivery Only</span>
@@ -228,7 +233,8 @@ export function ProductDetails({
                   ) : (
                     <span>No Delivery Options</span>
                   )
-                ) : product?.availableForDelivery && product?.availableForPickup ? (
+                ) : product?.availableForDelivery &&
+                  product?.availableForPickup ? (
                   <span>Delivery & Pickup</span>
                 ) : product?.availableForDelivery ? (
                   <span>Delivery Only</span>
@@ -238,7 +244,9 @@ export function ProductDetails({
                   <span>No Delivery Options</span>
                 )}
               </div>
-              <div className="text-xl font-bold mt-2">GHC {(productOption?.price || product?.price || 0).toFixed(2)}</div>
+              <div className="text-xl font-bold mt-2">
+                GHC {(productOption?.price || product?.price || 0).toFixed(2)}
+              </div>
             </div>
 
             {/* Product Options */}
@@ -246,7 +254,11 @@ export function ProductDetails({
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-medium">Options</h3>
-                  <Button variant="outline" size="sm" onClick={onAddOption} className="h-8">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onAddOption}
+                    className="h-8">
                     <Plus className="h-3 w-3 mr-1" /> Option
                   </Button>
                 </div>
@@ -254,10 +266,11 @@ export function ProductDetails({
                   {product.options.map((option) => (
                     <Button
                       key={option.id}
-                      variant={productOption?.id === option.id ? "default" : "outline"}
+                      variant={
+                        productOption?.id === option.id ? "default" : "outline"
+                      }
                       className="whitespace-nowrap"
-                      onClick={() => onOptionSelect && onOptionSelect(option)}
-                    >
+                      onClick={() => onOptionSelect && onOptionSelect(option)}>
                       {option.name}
                     </Button>
                   ))}
@@ -268,20 +281,28 @@ export function ProductDetails({
             <div>
               <h3 className="text-lg font-medium flex justify-between">
                 Description
-                <span className="text-sm text-blue-500 cursor-pointer">MORE</span>
+                <span className="text-sm text-blue-500 cursor-pointer">
+                  MORE
+                </span>
               </h3>
               <p className="mt-2 text-muted-foreground">
-                {productOption?.description || product?.description || "No description available."}
+                {productOption?.description ||
+                  product?.description ||
+                  "No description available."}
               </p>
             </div>
 
             <div>
               <h3 className="text-lg font-medium flex justify-between">
                 Terms of Service
-                <span className="text-sm text-blue-500 cursor-pointer">MORE</span>
+                <span className="text-sm text-blue-500 cursor-pointer">
+                  MORE
+                </span>
               </h3>
               <p className="mt-2 text-muted-foreground">
-                {productOption?.termsOfService || product?.termsOfService || "No terms of service available."}
+                {productOption?.termsOfService ||
+                  product?.termsOfService ||
+                  "No terms of service available."}
               </p>
             </div>
           </>
@@ -320,8 +341,7 @@ export function ProductDetails({
               <div className="grid grid-cols-2 gap-4">
                 <div
                   className="border-2 border-dashed rounded-md p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50"
-                  onClick={handleImageUpload}
-                >
+                  onClick={handleImageUpload}>
                   <div className="bg-primary/10 rounded-full p-3 mb-2">
                     <Upload className="h-6 w-6 text-primary" />
                   </div>
@@ -360,21 +380,27 @@ export function ProductDetails({
                   </div>
                   <div className="flex gap-6 mt-4">
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
+                      <Checkbox
                         id="pickup"
                         checked={formData?.availableForPickup || false}
-                        onCheckedChange={(checked) => 
-                          handleCheckboxChange("availableForPickup", checked as boolean)
+                        onCheckedChange={(checked) =>
+                          handleCheckboxChange(
+                            "availableForPickup",
+                            checked as boolean
+                          )
                         }
                       />
                       <Label htmlFor="pickup">Pick up</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
+                      <Checkbox
                         id="delivery"
                         checked={formData?.availableForDelivery || false}
-                        onCheckedChange={(checked) => 
-                          handleCheckboxChange("availableForDelivery", checked as boolean)
+                        onCheckedChange={(checked) =>
+                          handleCheckboxChange(
+                            "availableForDelivery",
+                            checked as boolean
+                          )
                         }
                       />
                       <Label htmlFor="delivery">Delivery</Label>

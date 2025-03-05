@@ -135,7 +135,9 @@ const Inventory = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Inventory</h1>
-          <p className="text-muted-foreground">Manage your products and categories</p>
+          <p className="text-muted-foreground">
+            Manage your products and categories
+          </p>
         </div>
         <div className="flex gap-2">
           <div className="flex">
@@ -143,16 +145,14 @@ const Inventory = () => {
               variant={viewMode === "list" ? "default" : "outline"}
               size="icon"
               className="rounded-r-none"
-              onClick={() => setViewMode("list")}
-            >
+              onClick={() => setViewMode("list")}>
               <ListIcon className="h-4 w-4" />
             </Button>
             <Button
               variant={viewMode === "tile" ? "default" : "outline"}
               size="icon"
               className="rounded-l-none"
-              onClick={() => setViewMode("tile")}
-            >
+              onClick={() => setViewMode("tile")}>
               <Grid className="h-4 w-4" />
             </Button>
           </div>
@@ -163,34 +163,36 @@ const Inventory = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="col-span-2">
-          <Tabs defaultValue="products" onValueChange={(value) => setActiveTab(value as "products" | "categories")}>
+      <div>
+        <div>
+          <Tabs
+            defaultValue="products"
+            onValueChange={(value) =>
+              setActiveTab(value as "products" | "categories")
+            }>
             <TabsList className="grid w-full grid-cols-2 sm:w-[400px]">
               <TabsTrigger value="products">Products</TabsTrigger>
               <TabsTrigger value="categories">Categories</TabsTrigger>
             </TabsList>
             <TabsContent value="products" className="mt-6">
-              <Products viewMode={viewMode} onProductSelect={handleProductSelect} />
+              <Products
+                viewMode={viewMode}
+                onProductSelect={handleProductSelect}
+                selectedProduct={selectedProduct}
+                selectedOption={selectedOption}
+                detailsMode={detailsMode}
+                handleOptionSave={handleOptionSave}
+                handleOptionDelete={handleOptionDelete}
+                setDetailsMode={setDetailsMode}
+                handleCloseDetails={handleCloseDetails}
+                handleAddOption={handleAddOption}
+                handleOptionSelect={handleOptionSelect}
+              />
             </TabsContent>
             <TabsContent value="categories" className="mt-6">
               <Categories viewMode={viewMode} />
             </TabsContent>
           </Tabs>
-        </div>
-
-        <div className="col-span-3 lg:col-span-1 h-[calc(100vh-12rem)] overflow-auto">
-          <ProductDetails
-            product={selectedProduct}
-            productOption={selectedOption}
-            mode={detailsMode}
-            onSave={handleOptionSave}
-            onDelete={handleOptionDelete}
-            onModeChange={setDetailsMode}
-            onClose={handleCloseDetails}
-            onAddOption={handleAddOption}
-            onOptionSelect={handleOptionSelect}
-          />
         </div>
       </div>
     </div>
