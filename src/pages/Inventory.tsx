@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Products } from "@/components/inventory/Products";
@@ -45,18 +44,11 @@ const Inventory = () => {
 
   const handleAddNew = () => {
     if (activeTab === "products") {
-      if (selectedCategory) {
-        // If category is selected, add product to that category
-        setDetailsMode("add");
-        setSelectedProduct(null);
-        setSelectedOption(null);
-        setProductNameInput("");
-      } else {
-        toast({
-          title: "Select a Category",
-          description: "Please select a category first to add a product.",
-        });
-      }
+      // No longer require a category to be selected
+      setDetailsMode("add");
+      setSelectedProduct(null);
+      setSelectedOption(null);
+      setProductNameInput("");
     } else {
       setCategoryDetailsMode("add");
       setSelectedCategory(null);
@@ -89,12 +81,13 @@ const Inventory = () => {
       description: `Product ${detailsMode === "add" ? "added" : "updated"} successfully!`,
     });
     
-    if (detailsMode === "add" && selectedCategory) {
-      // Simulate adding the product to the selected category
+    if (detailsMode === "add") {
+      // Create a new product, using the selected category if available
       const newProduct: Product = {
         ...updatedProduct,
         id: `product-${Date.now()}`,
-        category: selectedCategory.name,
+        // Use selected category if available, otherwise use a default
+        category: selectedCategory ? selectedCategory.name : "Uncategorized",
       };
       setSelectedProduct(newProduct);
       setDetailsMode("view");
@@ -222,12 +215,13 @@ const Inventory = () => {
   };
 
   const handleSelectExistingProduct = (product: Product) => {
-    if (detailsMode === "add" && selectedCategory) {
-      // Create a copy of the selected product with the new category
+    if (detailsMode === "add") {
+      // Create a copy of the selected product with the new category if selected
       const productCopy: Product = {
         ...product,
         id: `product-${Date.now()}`, // New ID for the copy
-        category: selectedCategory.name,
+        // Use selected category if available, otherwise keep the original category
+        category: selectedCategory ? selectedCategory.name : product.category,
         options: product.options ? product.options.map(option => ({
           ...option,
           id: `option-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
@@ -238,9 +232,6 @@ const Inventory = () => {
       setProductNameInput(product.name);
       setShowExistingProductsList(false);
       
-      // Note: In a real app, you would create a backend call to copy the product
-      // with the new category and other details
-      
       // Set to view mode to show the newly added product
       setDetailsMode("view");
       
@@ -250,7 +241,7 @@ const Inventory = () => {
       
       toast({
         title: "Success",
-        description: "Product added to category successfully!",
+        description: "Product added successfully!",
       });
     }
   };
