@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Products } from "@/components/inventory/Products";
@@ -26,6 +27,7 @@ const Inventory = () => {
   const { toast } = useToast();
   const [productNameInput, setProductNameInput] = useState("");
   const [existingProducts, setExistingProducts] = useState<Product[]>([]);
+  const [showExistingProductsList, setShowExistingProductsList] = useState(false);
 
   useEffect(() => {
     // When productNameInput changes, filter existing products for autocomplete
@@ -34,8 +36,10 @@ const Inventory = () => {
         p.name.toLowerCase().includes(productNameInput.toLowerCase())
       );
       setExistingProducts(matchingProducts);
+      setShowExistingProductsList(matchingProducts.length > 0);
     } else {
       setExistingProducts([]);
+      setShowExistingProductsList(false);
     }
   }, [productNameInput]);
 
@@ -46,6 +50,7 @@ const Inventory = () => {
         setDetailsMode("add");
         setSelectedProduct(null);
         setSelectedOption(null);
+        setProductNameInput("");
       } else {
         toast({
           title: "Select a Category",
@@ -157,6 +162,8 @@ const Inventory = () => {
         setSelectedProduct(null);
         setSelectedOption(null);
         setDetailsMode("view");
+        setProductNameInput("");
+        setShowExistingProductsList(false);
       } else {
         // If adding an option, go back to view mode for the selected product
         setDetailsMode("view");
@@ -221,13 +228,30 @@ const Inventory = () => {
         ...product,
         id: `product-${Date.now()}`, // New ID for the copy
         category: selectedCategory.name,
+        options: product.options ? product.options.map(option => ({
+          ...option,
+          id: `option-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+          productId: `product-${Date.now()}`
+        })) : []
       };
       setSelectedProduct(productCopy);
       setProductNameInput(product.name);
-      setExistingProducts([]);
+      setShowExistingProductsList(false);
       
       // Note: In a real app, you would create a backend call to copy the product
       // with the new category and other details
+      
+      // Set to view mode to show the newly added product
+      setDetailsMode("view");
+      
+      // Select the standard option by default
+      const standardOption = productCopy.options?.find(opt => opt.name === "Standard") || productCopy.options?.[0] || null;
+      setSelectedOption(standardOption);
+      
+      toast({
+        title: "Success",
+        description: "Product added to category successfully!",
+      });
     }
   };
 
@@ -295,7 +319,7 @@ const Inventory = () => {
                     placeholder="Type to search for existing products or enter a new name"
                     className="mb-2"
                   />
-                  {existingProducts.length > 0 && (
+                  {showExistingProductsList && (
                     <div className="absolute z-10 bg-white border rounded-md shadow-lg w-full max-h-60 overflow-y-auto">
                       {existingProducts.map((product) => (
                         <div
