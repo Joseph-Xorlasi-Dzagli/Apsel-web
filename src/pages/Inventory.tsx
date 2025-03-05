@@ -1,32 +1,60 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Products } from "@/components/inventory/Products";
 import { Categories } from "@/components/inventory/Categories";
 import { Button } from "@/components/ui/button";
 import { Plus, Grid, List as ListIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Product, ProductOption, sampleProducts } from "@/lib/data";
+import { Product, ProductOption, Category, sampleProducts, sampleCategories } from "@/lib/data";
 import { ProductDetails } from "@/components/inventory/ProductDetails";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const Inventory = () => {
   const [activeTab, setActiveTab] = useState<"products" | "categories">("products");
   const [viewMode, setViewMode] = useState<"list" | "tile">("list");
+  
+  // Product state
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedOption, setSelectedOption] = useState<ProductOption | null>(null);
   const [detailsMode, setDetailsMode] = useState<"view" | "edit" | "add">("view");
+  
+  // Category state
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [categoryDetailsMode, setCategoryDetailsMode] = useState<"view" | "edit" | "add">("view");
+  
   const { toast } = useToast();
+  const [productNameInput, setProductNameInput] = useState("");
+  const [existingProducts, setExistingProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    // When productNameInput changes, filter existing products for autocomplete
+    if (productNameInput.length > 1) {
+      const matchingProducts = sampleProducts.filter(p => 
+        p.name.toLowerCase().includes(productNameInput.toLowerCase())
+      );
+      setExistingProducts(matchingProducts);
+    } else {
+      setExistingProducts([]);
+    }
+  }, [productNameInput]);
 
   const handleAddNew = () => {
     if (activeTab === "products") {
-      setDetailsMode("add");
-      setSelectedProduct(null);
-      setSelectedOption(null);
+      if (selectedCategory) {
+        // If category is selected, add product to that category
+        setDetailsMode("add");
+        setSelectedProduct(null);
+        setSelectedOption(null);
+      } else {
+        toast({
+          title: "Select a Category",
+          description: "Please select a category first to add a product.",
+        });
+      }
     } else {
-      toast({
-        title: "Add New Category",
-        description: "This feature will be available soon!",
-      });
+      setCategoryDetailsMode("add");
+      setSelectedCategory(null);
     }
   };
 
@@ -55,6 +83,17 @@ const Inventory = () => {
       title: "Success",
       description: `Product ${detailsMode === "add" ? "added" : "updated"} successfully!`,
     });
+    
+    if (detailsMode === "add" && selectedCategory) {
+      // Simulate adding the product to the selected category
+      const newProduct: Product = {
+        ...updatedProduct,
+        id: `product-${Date.now()}`,
+        category: selectedCategory.name,
+      };
+      setSelectedProduct(newProduct);
+      setDetailsMode("view");
+    }
   };
 
   const handleOptionSave = (option: ProductOption) => {
@@ -130,6 +169,68 @@ const Inventory = () => {
     }
   };
 
+  // Category handlers
+  const handleCategorySelect = (category: Category) => {
+    setSelectedCategory(category);
+    setCategoryDetailsMode("view");
+  };
+
+  const handleCategorySave = (category: Category) => {
+    // In a real app, this would update the backend
+    toast({
+      title: "Success",
+      description: `Category ${categoryDetailsMode === "add" ? "added" : "updated"} successfully!`,
+    });
+    
+    if (categoryDetailsMode === "add") {
+      // Simulate adding a new category
+      const newCategory: Category = {
+        ...category,
+        id: `category-${Date.now()}`,
+      };
+      setSelectedCategory(newCategory);
+      setCategoryDetailsMode("view");
+    } else {
+      setSelectedCategory(category);
+      setCategoryDetailsMode("view");
+    }
+  };
+
+  const handleCategoryDelete = (categoryId: string) => {
+    // In a real app, this would delete from the backend
+    toast({
+      title: "Success",
+      description: "Category deleted successfully!",
+    });
+    setSelectedCategory(null);
+  };
+
+  const handleCloseCategoryDetails = () => {
+    if (categoryDetailsMode === "add") {
+      setSelectedCategory(null);
+      setCategoryDetailsMode("view");
+    } else if (categoryDetailsMode === "edit") {
+      setCategoryDetailsMode("view");
+    }
+  };
+
+  const handleSelectExistingProduct = (product: Product) => {
+    if (detailsMode === "add" && selectedCategory) {
+      // Create a copy of the selected product with the new category
+      const productCopy: Product = {
+        ...product,
+        id: `product-${Date.now()}`, // New ID for the copy
+        category: selectedCategory.name,
+      };
+      setSelectedProduct(productCopy);
+      setProductNameInput(product.name);
+      setExistingProducts([]);
+      
+      // Note: In a real app, you would create a backend call to copy the product
+      // with the new category and other details
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
@@ -167,14 +268,48 @@ const Inventory = () => {
         <div>
           <Tabs
             defaultValue="products"
-            onValueChange={(value) =>
-              setActiveTab(value as "products" | "categories")
-            }>
+            onValueChange={(value) => {
+              setActiveTab(value as "products" | "categories");
+              // Reset selections when switching tabs
+              if (value === "products") {
+                setSelectedCategory(null);
+                setCategoryDetailsMode("view");
+              } else {
+                setSelectedProduct(null);
+                setSelectedOption(null);
+                setDetailsMode("view");
+              }
+            }}>
             <TabsList className="grid w-full grid-cols-2 sm:w-[400px]">
               <TabsTrigger value="products">Products</TabsTrigger>
               <TabsTrigger value="categories">Categories</TabsTrigger>
             </TabsList>
             <TabsContent value="products" className="mt-6">
+              {detailsMode === "add" && !selectedProduct && (
+                <div className="mb-4 relative">
+                  <Label htmlFor="productName">Product Name</Label>
+                  <Input
+                    id="productName"
+                    value={productNameInput}
+                    onChange={(e) => setProductNameInput(e.target.value)}
+                    placeholder="Type to search for existing products or enter a new name"
+                    className="mb-2"
+                  />
+                  {existingProducts.length > 0 && (
+                    <div className="absolute z-10 bg-white border rounded-md shadow-lg w-full max-h-60 overflow-y-auto">
+                      {existingProducts.map((product) => (
+                        <div
+                          key={product.id}
+                          className="p-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => handleSelectExistingProduct(product)}
+                        >
+                          {product.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
               <Products
                 viewMode={viewMode}
                 onProductSelect={handleProductSelect}
@@ -190,7 +325,16 @@ const Inventory = () => {
               />
             </TabsContent>
             <TabsContent value="categories" className="mt-6">
-              <Categories viewMode={viewMode} />
+              <Categories 
+                viewMode={viewMode}
+                selectedCategory={selectedCategory}
+                onCategorySelect={handleCategorySelect}
+                detailsMode={categoryDetailsMode}
+                setDetailsMode={setCategoryDetailsMode}
+                handleCategorySave={handleCategorySave}
+                handleCategoryDelete={handleCategoryDelete}
+                handleCloseDetails={handleCloseCategoryDetails}
+              />
             </TabsContent>
           </Tabs>
         </div>

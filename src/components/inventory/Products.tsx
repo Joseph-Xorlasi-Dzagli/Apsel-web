@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   Table, 
@@ -143,7 +144,6 @@ export function Products({
                   <TableHeader>
                     <TableRow>
                       <TableHead>Product</TableHead>
-                      <TableHead>Category</TableHead>
                       <TableHead className="text-right">Price</TableHead>
                       <TableHead className="text-right">Stock</TableHead>
                       <TableHead className="text-right">Sold</TableHead>
@@ -174,7 +174,6 @@ export function Products({
                             <span className="font-medium">{product.name}</span>
                           </div>
                         </TableCell>
-                        <TableCell>{product.category}</TableCell>
                         <TableCell className="text-right">
                           GHC {product.price.toFixed(2)}
                         </TableCell>
@@ -224,9 +223,6 @@ export function Products({
                         <div className="flex justify-between items-start">
                           <div>
                             <h3 className="font-medium">{product.name}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {product.category}
-                            </p>
                           </div>
                           <p className="font-bold">
                             GHC {product.price.toFixed(2)}
