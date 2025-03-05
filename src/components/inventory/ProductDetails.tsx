@@ -1,13 +1,18 @@
-
 import { useState, useEffect, ChangeEvent } from "react";
 import { Product, ProductOption } from "@/lib/data";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, Edit, Trash2, PackageOpen, ArrowLeft, X, Plus } from "lucide-react";
+import { Upload, PackageOpen, ArrowLeft, X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 
@@ -23,6 +28,7 @@ interface ProductDetailsProps {
   onClose?: () => void;
   onAddOption?: () => void;
   onOptionSelect?: (option: ProductOption) => void;
+  existingProducts?: Product[];
 }
 
 export function ProductDetails({
@@ -35,10 +41,13 @@ export function ProductDetails({
   onClose,
   onAddOption,
   onOptionSelect,
+  existingProducts = [],
 }: ProductDetailsProps) {
   const { toast } = useToast();
   const [formData, setFormData] = useState<ProductOption | null>(productOption);
-  
+  const [showExistingProductsList, setShowExistingProductsList] =
+    useState(false);
+
   useEffect(() => {
     if (mode === "add" && product) {
       // Creating a new product option
@@ -59,7 +68,7 @@ export function ProductDetails({
       setFormData({
         id: `option-${Date.now()}`,
         productId: `prod-${Date.now()}`,
-        name: "Standard",
+        name: "",
         price: 0,
         stock: 0,
         image: "",
@@ -74,9 +83,17 @@ export function ProductDetails({
     }
   }, [productOption, product, mode]);
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => {
+
+    if (name === "name" && mode === "add" && !product) {
+      // When typing in product name field while adding a new product
+      setShowExistingProductsList(true);
+    }
+
+    setFormData((prev) => {
       if (!prev) return null;
       return {
         ...prev,
@@ -86,7 +103,7 @@ export function ProductDetails({
   };
 
   const handleCheckboxChange = (name: string, checked: boolean) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       if (!prev) return null;
       return {
         ...prev,
@@ -120,6 +137,50 @@ export function ProductDetails({
     });
   };
 
+  const handleSelectExistingProduct = (selectedProduct: Product) => {
+    if (mode === "add") {
+      // Create a copy of the selected product with a new ID
+      const productCopy: Product = {
+        ...selectedProduct,
+        id: `product-${Date.now()}`, // New ID for the copy
+        options: selectedProduct.options
+          ? selectedProduct.options.map((option) => ({
+              ...option,
+              id: `option-${Date.now()}-${Math.random()
+                .toString(36)
+                .substring(2, 9)}`,
+              productId: `product-${Date.now()}`,
+            }))
+          : [],
+      };
+
+      // Create a standard option for this product
+      const standardOption: ProductOption = {
+        id: `option-${Date.now()}`,
+        productId: productCopy.id,
+        name: productCopy.name,
+        price: productCopy.price,
+        stock: productCopy.stock,
+        image: productCopy.image,
+        description: productCopy.description,
+        termsOfService: productCopy.termsOfService,
+        availableForDelivery: productCopy.availableForDelivery || false,
+        availableForPickup: productCopy.availableForPickup || true,
+      };
+
+      // Set form data to this standard option
+      setFormData(standardOption);
+
+      // Hide the product list
+      setShowExistingProductsList(false);
+
+      toast({
+        title: "Success",
+        description: "Product selected successfully!",
+      });
+    }
+  };
+
   // If no product is selected and not adding a new product
   if (!product && mode !== "add") {
     return (
@@ -130,7 +191,8 @@ export function ProductDetails({
         <CardContent className="flex flex-col items-center justify-center h-[calc(100%-64px)]">
           <PackageOpen className="h-16 w-16 text-muted-foreground mb-4" />
           <p className="text-center text-muted-foreground">
-            Select a product to view its details or click Add New Product to create one.
+            Select a product to view its details or click Add New Product to
+            create one.
           </p>
         </CardContent>
       </Card>
@@ -308,7 +370,7 @@ export function ProductDetails({
           </>
         ) : (
           <>
-            {isNewOption && (
+            {/* {isNewOption && (
               <div className="space-y-2">
                 <Label htmlFor="name">OPTION NAME</Label>
                 <Input
@@ -320,21 +382,42 @@ export function ProductDetails({
                   maxLength={20}
                 />
                 <p className="text-xs text-muted-foreground">20 chars max</p>
-              </div>
-            )}
+              )} */}
 
-            {isNewProduct && (
-              <div className="space-y-2">
+              {isNewProduct && (
+                <div className="mb-4 relative">
                 <Label htmlFor="name">PRODUCT NAME</Label>
                 <Input
                   id="name"
                   name="name"
                   value={formData?.name || ""}
-                  onChange={handleInputChange}
-                  placeholder="Enter product name"
+                  onChange={(e) => {
+                  handleInputChange(e);
+                  setShowExistingProductsList(true);
+                  }}
+                  placeholder="Type to search for existing products or enter a new name"
+                  className="mb-2"
                 />
-              </div>
-            )}
+                {showExistingProductsList && existingProducts.length > 0 && (
+                  <div className="absolute z-10 bg-white border rounded-md shadow-lg w-full max-h-60 overflow-y-auto">
+                  {existingProducts
+                    .filter((prod) =>
+                    prod.name
+                      .toLowerCase()
+                      .includes(formData?.name.toLowerCase() || "")
+                    )
+                    .map((prod) => (
+                    <div
+                      key={prod.id}
+                      className="p-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => handleSelectExistingProduct(prod)}>
+                      {prod.name}
+                    </div>
+                    ))}
+                  </div>
+                )}
+                </div>
+              )}
 
             <div className="space-y-2">
               <Label>UPLOAD PHOTO</Label>

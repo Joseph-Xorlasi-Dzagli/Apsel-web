@@ -338,6 +338,7 @@ export function Products({
             onClose={handleCloseDetails}
             onAddOption={handleAddOption}
             onOptionSelect={handleOptionSelect}
+            existingProducts={sampleProducts}
           />
         </div>
       </div>

@@ -300,31 +300,6 @@ const Inventory = () => {
               <TabsTrigger value="categories">Categories</TabsTrigger>
             </TabsList>
             <TabsContent value="products" className="mt-6">
-              {detailsMode === "add" && !selectedProduct && (
-                <div className="mb-4 relative">
-                  <Label htmlFor="productName">Product Name</Label>
-                  <Input
-                    id="productName"
-                    value={productNameInput}
-                    onChange={(e) => setProductNameInput(e.target.value)}
-                    placeholder="Type to search for existing products or enter a new name"
-                    className="mb-2"
-                  />
-                  {showExistingProductsList && (
-                    <div className="absolute z-10 bg-white border rounded-md shadow-lg w-full max-h-60 overflow-y-auto">
-                      {existingProducts.map((product) => (
-                        <div
-                          key={product.id}
-                          className="p-2 hover:bg-gray-100 cursor-pointer"
-                          onClick={() => handleSelectExistingProduct(product)}
-                        >
-                          {product.name}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
               <Products
                 viewMode={viewMode}
                 onProductSelect={handleProductSelect}
