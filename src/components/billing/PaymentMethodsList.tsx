@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { Check, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import PaymentMethodDetails from "./PaymentMethodDetails";
 
 interface PaymentMethodsListProps {
   paymentMethod: string;
@@ -15,27 +14,6 @@ const PaymentMethodsList = ({
   handleSelectPaymentMethod,
   setHasPaymentMethod
 }: PaymentMethodsListProps) => {
-  const [selectedMethod, setSelectedMethod] = useState<any>(null);
-  const [isAdding, setIsAdding] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-
-  const handleClose = () => {
-    setSelectedMethod(null);
-    setIsAdding(false);
-    setIsEditing(false);
-  };
-
-  const handleSave = (data: any) => {
-    console.log("Saving payment method:", data);
-    setHasPaymentMethod(true);
-    setIsEditing(false);
-    handleClose();
-  };
-
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
   return (
     <div className="grid grid-cols-1 gap-6">
       <div>
@@ -44,33 +22,18 @@ const PaymentMethodsList = ({
           <Button 
             size="sm" 
             className="rounded-full bg-brand hover:bg-brand-dark"
-            onClick={() => {
-              setIsAdding(true);
-              setSelectedMethod(null);
-              setIsEditing(false);
-            }}
+            onClick={() => handleSelectPaymentMethod('new')}
           >
             <Plus className="h-4 w-4" />
           </Button>
         </div>
 
-        <div className="space-y-4">
+        <div className="flex flex-wrap gap-4">
           <div 
             className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${
               paymentMethod === 'gpay' ? 'border-brand bg-brand-light/30' : ''
-            }`}
-            onClick={() => {
-              handleSelectPaymentMethod('gpay');
-              setSelectedMethod({
-                id: '1',
-                type: 'gpay',
-                lastFour: '4321',
-                expiryDate: '12/25',
-                cardHolderName: 'John Doe'
-              });
-              setIsEditing(false);
-              setIsAdding(false);
-            }}
+            } w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)]`}
+            onClick={() => handleSelectPaymentMethod('gpay')}
           >
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -91,19 +54,8 @@ const PaymentMethodsList = ({
           <div 
             className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${
               paymentMethod === 'visa' ? 'border-brand bg-brand-light/30' : ''
-            }`}
-            onClick={() => {
-              handleSelectPaymentMethod('visa');
-              setSelectedMethod({
-                id: '2',
-                type: 'visa',
-                lastFour: '4242',
-                expiryDate: '04/25',
-                cardHolderName: 'Jane Doe'
-              });
-              setIsEditing(false);
-              setIsAdding(false);
-            }}
+            } w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)]`}
+            onClick={() => handleSelectPaymentMethod('visa')}
           >
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-blue-700 flex items-center justify-center">
@@ -124,19 +76,8 @@ const PaymentMethodsList = ({
           <div 
             className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${
               paymentMethod === 'mastercard' ? 'border-brand bg-brand-light/30' : ''
-            }`}
-            onClick={() => {
-              handleSelectPaymentMethod('mastercard');
-              setSelectedMethod({
-                id: '3',
-                type: 'mastercard',
-                lastFour: '8412',
-                expiryDate: '12/24',
-                cardHolderName: 'Alice Smith'
-              });
-              setIsEditing(false);
-              setIsAdding(false);
-            }}
+            } w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)]`}
+            onClick={() => handleSelectPaymentMethod('mastercard')}
           >
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-red-500 flex items-center justify-center">

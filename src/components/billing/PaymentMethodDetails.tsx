@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -7,8 +7,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CreditCard, Pencil, X } from "lucide-react";
+import { CreditCard, Pencil, Trash2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const paymentMethodSchema = z.object({
   cardHolderName: z.string().min(1, "Card holder name is required"),
@@ -29,6 +40,7 @@ interface PaymentMethodDetailsProps {
   } | null;
   onClose: () => void;
   onSave: (data: PaymentMethodForm) => void;
+  onDelete?: (id: string) => void;
   isEditing?: boolean;
   onEdit?: () => void;
 }
@@ -37,12 +49,19 @@ const PaymentMethodDetails = ({
   selectedMethod, 
   onClose,
   onSave,
+  onDelete,
   isEditing = false,
   onEdit
 }: PaymentMethodDetailsProps) => {
   const { toast } = useToast();
   const { register, handleSubmit, formState: { errors } } = useForm<PaymentMethodForm>({
     resolver: zodResolver(paymentMethodSchema),
+    defaultValues: selectedMethod ? {
+      cardHolderName: selectedMethod.cardHolderName,
+      cardNumber: `************${selectedMethod.lastFour}`,
+      expiryDate: selectedMethod.expiryDate,
+      cvv: ''
+    } : undefined
   });
 
   const onSubmit = (data: PaymentMethodForm) => {
@@ -51,6 +70,16 @@ const PaymentMethodDetails = ({
       title: selectedMethod ? "Payment method updated" : "Payment method added",
       description: "Your changes have been saved successfully.",
     });
+  };
+  
+  const handleDelete = () => {
+    if (selectedMethod && onDelete) {
+      onDelete(selectedMethod.id);
+      toast({
+        title: "Payment method deleted",
+        description: "The payment method has been removed successfully.",
+      });
+    }
   };
 
   return (
@@ -145,9 +174,35 @@ const PaymentMethodDetails = ({
                 )}
               </div>
             </div>
-            <Button type="submit" className="w-full">
-              {isEditing ? "Save Changes" : "Add Payment Method"}
-            </Button>
+            <div className="flex gap-2 mt-6">
+              <Button type="submit" className="flex-1">
+                {isEditing ? "Save Changes" : "Add Payment Method"}
+              </Button>
+              
+              {isEditing && selectedMethod && onDelete && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" type="button" size="icon">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Payment Method</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete this payment method? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
           </form>
         )}
       </CardContent>
