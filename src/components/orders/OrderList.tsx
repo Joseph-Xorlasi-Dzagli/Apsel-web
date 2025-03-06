@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,7 +21,9 @@ import {
 import { Order, OrderStatus } from "@/lib/data";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { Truck, MapPin } from "lucide-react";
+import { Truck, MapPin, Tag, Trash2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { OrderStatusDialog } from "@/components/orders/OrderStatusDialog";
 
 interface OrderListProps {
   orders: Order[];
@@ -59,6 +62,9 @@ export function OrderList({
   onViewOrder
 }: OrderListProps) {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const startItem = (currentPage - 1) * ordersPerPage + 1;
   const endItem = Math.min(currentPage * ordersPerPage, totalOrders);
@@ -79,13 +85,111 @@ export function OrderList({
     }
   };
 
+  // Handle checkbox click
+  const handleCheckboxClick = (e: React.MouseEvent, orderId: string) => {
+    e.stopPropagation(); // Prevent row click
+    
+    setSelectedOrderIds(prev => {
+      if (prev.includes(orderId)) {
+        return prev.filter(id => id !== orderId);
+      } else {
+        return [...prev, orderId];
+      }
+    });
+  };
+
+  // Select all orders on current page
+  const handleSelectAll = () => {
+    if (selectedOrderIds.length === orders.length) {
+      setSelectedOrderIds([]);
+    } else {
+      setSelectedOrderIds(orders.map(order => order.id));
+    }
+  };
+
+  // Open status change dialog
+  const handleOpenStatusDialog = () => {
+    if (selectedOrderIds.length > 0) {
+      setIsStatusDialogOpen(true);
+    }
+  };
+
+  // Open delete confirmation dialog
+  const handleOpenDeleteDialog = () => {
+    if (selectedOrderIds.length > 0) {
+      setIsDeleteDialogOpen(true);
+    }
+  };
+
+  // Update order statuses
+  const handleUpdateStatus = (newStatus: OrderStatus, sendNote: boolean, note?: string) => {
+    // In a real app, this would call an API to update the status
+    console.log(`Updating ${selectedOrderIds.length} orders to status: ${newStatus}`);
+    console.log(`Send note to customer: ${sendNote ? 'Yes' : 'No'}`);
+    if (note) {
+      console.log(`Note: ${note}`);
+    }
+    
+    // Close the dialog and clear selections
+    setIsStatusDialogOpen(false);
+    setSelectedOrderIds([]);
+  };
+
+  // Handle bulk deletion
+  const handleDeleteOrders = (sendNote: boolean, note?: string) => {
+    // In a real app, this would call an API to delete the orders
+    console.log(`Deleting ${selectedOrderIds.length} orders`);
+    console.log(`Send note to customer: ${sendNote ? 'Yes' : 'No'}`);
+    if (note) {
+      console.log(`Note: ${note}`);
+    }
+    
+    // Close the dialog and clear selections
+    setIsDeleteDialogOpen(false);
+    setSelectedOrderIds([]);
+  };
+
   return (
     <div className="space-y-4">
+      {/* Bulk Actions Bar - Show when orders are selected */}
+      {selectedOrderIds.length > 0 && (
+        <div className="flex items-center justify-between bg-muted/30 py-2 px-4 rounded-md">
+          <span className="font-medium">{selectedOrderIds.length} Orders Selected</span>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-1"
+              onClick={handleOpenStatusDialog}
+            >
+              <Tag className="h-4 w-4" />
+              Change Status
+            </Button>
+            <Button 
+              variant="destructive" 
+              size="sm" 
+              className="flex items-center gap-1"
+              onClick={handleOpenDeleteDialog}
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete
+            </Button>
+          </div>
+        </div>
+      )}
+
       {viewMode === "list" ? (
         <div className="overflow-x-auto rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-10">
+                  <Checkbox 
+                    checked={selectedOrderIds.length === orders.length && orders.length > 0}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="Select all orders"
+                  />
+                </TableHead>
                 <TableHead>Order ID</TableHead>
                 <TableHead>Customer</TableHead>
                 <TableHead>Date</TableHead>
@@ -108,6 +212,20 @@ export function OrderList({
                     selectedOrderId === order.id ? "bg-blue-100" : ""
                   }`}
                   onClick={() => handleRowClick(order)}>
+                  <TableCell className="w-10" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox 
+                      checked={selectedOrderIds.includes(order.id)}
+                      onCheckedChange={() => {
+                        setSelectedOrderIds(prev => 
+                          prev.includes(order.id) 
+                            ? prev.filter(id => id !== order.id) 
+                            : [...prev, order.id]
+                        );
+                      }}
+                      aria-label={`Select order ${order.id}`}
+                      className="mr-2"
+                    />
+                  </TableCell>
                   <TableCell className="font-medium">{order.id}</TableCell>
                   <TableCell>{order.customerName}</TableCell>
                   <TableCell>
@@ -153,7 +271,21 @@ export function OrderList({
               onClick={() => handleRowClick(order)}>
               <CardContent className="p-5">
                 <div className="flex justify-between mb-3">
-                  <span className="font-medium">Order #{order.id}</span>
+                  <div className="flex items-center gap-2">
+                    <Checkbox 
+                      checked={selectedOrderIds.includes(order.id)}
+                      onCheckedChange={() => {
+                        setSelectedOrderIds(prev => 
+                          prev.includes(order.id) 
+                            ? prev.filter(id => id !== order.id) 
+                            : [...prev, order.id]
+                        );
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label={`Select order ${order.id}`}
+                    />
+                    <span className="font-medium text-sm">Order #{order.id}</span>
+                  </div>
                   <Badge
                     variant="outline"
                     className={`${getStatusColor(order.status)}`}>
@@ -247,6 +379,25 @@ export function OrderList({
           </PaginationContent>
         </Pagination>
       </div>
+
+      {/* Status Change Dialog */}
+      <OrderStatusDialog 
+        isOpen={isStatusDialogOpen} 
+        onClose={() => setIsStatusDialogOpen(false)}
+        onConfirm={handleUpdateStatus}
+        orderCount={selectedOrderIds.length}
+      />
+      
+      {/* Delete Confirmation Dialog */}
+      {isDeleteDialogOpen && (
+        <OrderStatusDialog 
+          isOpen={isDeleteDialogOpen}
+          onClose={() => setIsDeleteDialogOpen(false)}
+          onConfirm={(_, sendNote, note) => handleDeleteOrders(sendNote, note)}
+          orderCount={selectedOrderIds.length}
+          mode="delete"
+        />
+      )}
     </div>
   );
 }
