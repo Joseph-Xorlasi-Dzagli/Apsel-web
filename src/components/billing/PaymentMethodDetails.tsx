@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CreditCard, X } from "lucide-react";
+import { CreditCard, Pencil, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const paymentMethodSchema = z.object({
@@ -30,13 +30,15 @@ interface PaymentMethodDetailsProps {
   onClose: () => void;
   onSave: (data: PaymentMethodForm) => void;
   isEditing?: boolean;
+  onEdit?: () => void;
 }
 
 const PaymentMethodDetails = ({ 
   selectedMethod, 
   onClose,
   onSave,
-  isEditing = false 
+  isEditing = false,
+  onEdit
 }: PaymentMethodDetailsProps) => {
   const { toast } = useToast();
   const { register, handleSubmit, formState: { errors } } = useForm<PaymentMethodForm>({
@@ -58,13 +60,26 @@ const PaymentMethodDetails = ({
           {selectedMethod && !isEditing ? "Payment Method Details" : 
            isEditing ? "Edit Payment Method" : "Add Payment Method"}
         </CardTitle>
-        <Button 
-          variant="ghost" 
-          className="h-8 w-8 p-0" 
-          onClick={onClose}
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          {selectedMethod && !isEditing && onEdit && (
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="h-8 w-8 p-0" 
+              onClick={onEdit}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="h-8 w-8 p-0" 
+            onClick={onClose}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {selectedMethod && !isEditing ? (

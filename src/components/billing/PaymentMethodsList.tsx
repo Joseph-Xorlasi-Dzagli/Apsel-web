@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Check, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,11 +28,16 @@ const PaymentMethodsList = ({
   const handleSave = (data: any) => {
     console.log("Saving payment method:", data);
     setHasPaymentMethod(true);
+    setIsEditing(false);
     handleClose();
   };
 
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 gap-6">
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold">Payment Methods</h2>
@@ -41,6 +47,7 @@ const PaymentMethodsList = ({
             onClick={() => {
               setIsAdding(true);
               setSelectedMethod(null);
+              setIsEditing(false);
             }}
           >
             <Plus className="h-4 w-4" />
@@ -62,6 +69,7 @@ const PaymentMethodsList = ({
                 cardHolderName: 'John Doe'
               });
               setIsEditing(false);
+              setIsAdding(false);
             }}
           >
             <div className="flex items-center gap-3">
@@ -94,6 +102,7 @@ const PaymentMethodsList = ({
                 cardHolderName: 'Jane Doe'
               });
               setIsEditing(false);
+              setIsAdding(false);
             }}
           >
             <div className="flex items-center gap-3">
@@ -126,6 +135,7 @@ const PaymentMethodsList = ({
                 cardHolderName: 'Alice Smith'
               });
               setIsEditing(false);
+              setIsAdding(false);
             }}
           >
             <div className="flex items-center gap-3">
@@ -144,17 +154,6 @@ const PaymentMethodsList = ({
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="h-full">
-        {(selectedMethod || isAdding) && (
-          <PaymentMethodDetails
-            selectedMethod={selectedMethod}
-            onClose={handleClose}
-            onSave={handleSave}
-            isEditing={isEditing}
-          />
-        )}
       </div>
     </div>
   );
