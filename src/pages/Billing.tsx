@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -15,61 +14,19 @@ import BillingHistory from "@/components/billing/BillingHistory";
 import BillingInformation from "@/components/billing/BillingInformation";
 import PaymentMethodDetails from "@/components/billing/PaymentMethodDetails";
 
-// Define a type for payment methods
-interface PaymentMethod {
-  id: string;
-  type: string;
-  lastFour: string;
-  expiryDate: string;
-  cardHolderName: string;
-}
-
 const Billing = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [currentPlan, setCurrentPlan] = useState<string>("merchant");
   const [paymentMethod, setPaymentMethod] = useState<string>("gpay");
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
-  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("monthly");
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">(
+    "monthly"
+  );
   const [hasPaymentMethod, setHasPaymentMethod] = useState<boolean>(true);
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<any>(null);
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
-
-  // Default payment methods
-  const defaultPaymentMethods: PaymentMethod[] = [
-    {
-      id: '1',
-      type: 'gpay',
-      lastFour: '4321',
-      expiryDate: '12/25',
-      cardHolderName: 'John Doe'
-    },
-    {
-      id: '2',
-      type: 'visa',
-      lastFour: '4242',
-      expiryDate: '04/25',
-      cardHolderName: 'Jane Doe'
-    },
-    {
-      id: '3',
-      type: 'mastercard',
-      lastFour: '8412',
-      expiryDate: '12/24',
-      cardHolderName: 'Alice Smith'
-    }
-  ];
-
-  // Set default payment method on initial load
-  useEffect(() => {
-    if (!selectedMethod && hasPaymentMethod) {
-      const defaultMethod = defaultPaymentMethods.find(method => method.type === paymentMethod);
-      if (defaultMethod) {
-        setSelectedMethod(defaultMethod);
-      }
-    }
-  }, [paymentMethod, hasPaymentMethod]);
 
   const handleSubscribe = () => {
     setShowSuccess(true);
@@ -84,20 +41,34 @@ const Billing = () => {
 
   const handleSelectPaymentMethod = (method: string) => {
     setPaymentMethod(method);
-    
-    if (method === 'new') {
-      setSelectedMethod(null);
-      setIsAdding(true);
-      setIsEditing(false);
-      return;
-    }
-    
+
     // Set the selected method based on the chosen payment method
-    const methodDetails = defaultPaymentMethods.find(m => m.type === method);
-    if (methodDetails) {
-      setSelectedMethod(methodDetails);
+    if (method === "gpay") {
+      setSelectedMethod({
+        id: "1",
+        type: "gpay",
+        lastFour: "4321",
+        expiryDate: "12/25",
+        cardHolderName: "John Doe",
+      });
+    } else if (method === "visa") {
+      setSelectedMethod({
+        id: "2",
+        type: "visa",
+        lastFour: "4242",
+        expiryDate: "04/25",
+        cardHolderName: "Jane Doe",
+      });
+    } else if (method === "mastercard") {
+      setSelectedMethod({
+        id: "3",
+        type: "mastercard",
+        lastFour: "8412",
+        expiryDate: "12/24",
+        cardHolderName: "Alice Smith",
+      });
     }
-    
+
     setIsAdding(false);
     setIsEditing(false);
   };
@@ -107,45 +78,15 @@ const Billing = () => {
     setHasPaymentMethod(true);
     setIsEditing(false);
     setIsAdding(false);
-    
+
     toast({
       title: isEditing ? "Payment method updated" : "Payment method added",
       description: "Your changes have been saved successfully.",
     });
   };
 
-  const handleDelete = (id: string) => {
-    console.log("Deleting payment method:", id);
-    // In a real application, you would call an API to delete the payment method
-    
-    // Set a different payment method as default if the deleted one was selected
-    if (selectedMethod && selectedMethod.id === id) {
-      const remainingMethods = defaultPaymentMethods.filter(method => method.id !== id);
-      if (remainingMethods.length > 0) {
-        setPaymentMethod(remainingMethods[0].type);
-        setSelectedMethod(remainingMethods[0]);
-      } else {
-        setHasPaymentMethod(false);
-        setSelectedMethod(null);
-      }
-    }
-    
-    handleClose();
-    
-    toast({
-      title: "Payment method deleted",
-      description: "The payment method has been removed successfully.",
-    });
-  };
-
   const handleClose = () => {
-    if (isAdding) {
-      // If adding was canceled, go back to the default method
-      const defaultMethod = defaultPaymentMethods.find(method => method.type === paymentMethod);
-      if (defaultMethod) {
-        setSelectedMethod(defaultMethod);
-      }
-    }
+    setSelectedMethod(null);
     setIsAdding(false);
     setIsEditing(false);
   };
@@ -203,15 +144,14 @@ const Billing = () => {
         </div>
         <div className="space-y-8">
           <SubscriptionSummary />
-          
+
           {/* Payment Method Details Panel */}
-          {hasPaymentMethod && (
+          {(selectedMethod || isAdding) && (
             <div className="mt-8">
               <PaymentMethodDetails
-                selectedMethod={isAdding ? null : selectedMethod}
+                selectedMethod={selectedMethod}
                 onClose={handleClose}
                 onSave={handleSave}
-                onDelete={handleDelete}
                 isEditing={isEditing}
                 onEdit={handleEdit}
               />

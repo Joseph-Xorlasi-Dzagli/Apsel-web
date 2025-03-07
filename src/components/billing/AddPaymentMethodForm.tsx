@@ -16,6 +16,7 @@ const AddPaymentMethodForm = ({
     setHasPaymentMethod(true);
   };
 
+  
   return (
     <div className="mt-6">
       <PaymentMethodDetails

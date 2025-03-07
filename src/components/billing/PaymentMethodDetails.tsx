@@ -86,28 +86,31 @@ const PaymentMethodDetails = ({
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-xl font-bold">
-          {selectedMethod && !isEditing ? "Payment Method Details" : 
-           isEditing ? "Edit Payment Method" : "Add Payment Method"}
+          {selectedMethod && !isEditing
+            ? "Payment Method Details"
+            : isEditing
+            ? "Edit Payment Method"
+            : "Add Payment Method"}
         </CardTitle>
         <div className="flex items-center gap-2">
-          {selectedMethod && !isEditing && onEdit && (
-            <Button 
-              variant="ghost" 
+          {selectedMethod && !isEditing && onEdit ? (
+            <Button
+              variant="ghost"
               size="icon"
-              className="h-8 w-8 p-0" 
-              onClick={onEdit}
-            >
+              className="h-8 w-8 p-0"
+              onClick={onEdit}>
               <Pencil className="h-4 w-4" />
             </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 p-0"
+              onClick={onClose}
+              type="button">
+              <X className="h-4 w-4" />
+            </Button>
           )}
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="h-8 w-8 p-0" 
-            onClick={onClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -116,8 +119,12 @@ const PaymentMethodDetails = ({
             <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
               <CreditCard className="h-5 w-5 text-muted-foreground" />
               <div>
-                <p className="font-medium">•••• •••• •••• {selectedMethod.lastFour}</p>
-                <p className="text-sm text-muted-foreground">Expires {selectedMethod.expiryDate}</p>
+                <p className="font-medium">
+                  •••• •••• •••• {selectedMethod.lastFour}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Expires {selectedMethod.expiryDate}
+                </p>
               </div>
             </div>
             <div className="space-y-2">
@@ -135,7 +142,9 @@ const PaymentMethodDetails = ({
                 defaultValue={selectedMethod?.cardHolderName}
               />
               {errors.cardHolderName && (
-                <p className="text-sm text-destructive">{errors.cardHolderName.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.cardHolderName.message}
+                </p>
               )}
             </div>
             <div className="space-y-2">
@@ -146,7 +155,9 @@ const PaymentMethodDetails = ({
                 placeholder="1234 5678 9012 3456"
               />
               {errors.cardNumber && (
-                <p className="text-sm text-destructive">{errors.cardNumber.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.cardNumber.message}
+                </p>
               )}
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -158,7 +169,9 @@ const PaymentMethodDetails = ({
                   placeholder="MM/YY"
                 />
                 {errors.expiryDate && (
-                  <p className="text-sm text-destructive">{errors.expiryDate.message}</p>
+                  <p className="text-sm text-destructive">
+                    {errors.expiryDate.message}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
@@ -170,7 +183,9 @@ const PaymentMethodDetails = ({
                   placeholder="123"
                 />
                 {errors.cvv && (
-                  <p className="text-sm text-destructive">{errors.cvv.message}</p>
+                  <p className="text-sm text-destructive">
+                    {errors.cvv.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -178,7 +193,7 @@ const PaymentMethodDetails = ({
               <Button type="submit" className="flex-1">
                 {isEditing ? "Save Changes" : "Add Payment Method"}
               </Button>
-              
+
               {isEditing && selectedMethod && onDelete && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -190,12 +205,15 @@ const PaymentMethodDetails = ({
                     <AlertDialogHeader>
                       <AlertDialogTitle>Delete Payment Method</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Are you sure you want to delete this payment method? This action cannot be undone.
+                        Are you sure you want to delete this payment method?
+                        This action cannot be undone.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      <AlertDialogAction
+                        onClick={handleDelete}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                         Delete
                       </AlertDialogAction>
                     </AlertDialogFooter>

@@ -29,35 +29,9 @@ const BusinessHub = () => {
             onValueChange={(value) => setActiveTab(value)}
             className="w-full"
           >
-            <div className="px-6 pt-2">
-              <TabsList className={`w-full grid ${isMobile ? "grid-cols-2 gap-2" : "grid-cols-5"}`}>
-                <TabsTrigger value="profile">Profile</TabsTrigger>
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="market">Market Insights</TabsTrigger>
-                <TabsTrigger value="competitors">Competitor Analysis</TabsTrigger>
-                <TabsTrigger value="growth">Growth Opportunities</TabsTrigger>
-              </TabsList>
-            </div>
-            
             <div className="p-6">
               <TabsContent value="profile" className="mt-0 space-y-6">
                 <BusinessProfile />
-              </TabsContent>
-              
-              <TabsContent value="overview" className="mt-0 space-y-6">
-                <BusinessOverview />
-              </TabsContent>
-              
-              <TabsContent value="market" className="mt-0 space-y-6">
-                <MarketInsights />
-              </TabsContent>
-              
-              <TabsContent value="competitors" className="mt-0 space-y-6">
-                <CompetitorAnalysis />
-              </TabsContent>
-              
-              <TabsContent value="growth" className="mt-0 space-y-6">
-                <GrowthOpportunities />
               </TabsContent>
             </div>
           </Tabs>
