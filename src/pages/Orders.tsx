@@ -23,6 +23,7 @@ import {
   ShoppingCart,
   Truck,
   User,
+  Tag,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -35,7 +36,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DatePickerWithRange } from "@/components/sales/DateRangePicker";
 import { DateRange } from "react-day-picker";
 import { addDays, format, subDays } from "date-fns";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 
 const Orders = () => {
@@ -241,10 +242,19 @@ const Orders = () => {
               Manage your customer orders.
             </p>
           </div>
-          <Button onClick={handleCreateOrder}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create Order
-          </Button>
+          <div className="flex flex-row gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/orders/statuses">
+                <Tag className="h-4 w-4 mr-1" /> Manage Statuses
+              </Link>
+            </Button>
+            <Link to="/orders/create">
+              <Button onClick={handleCreateOrder} size="sm">
+                <PlusCircle className="mr-2 h-4 w-5" />
+                Create Order
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <OrderStats orders={sampleOrders} />

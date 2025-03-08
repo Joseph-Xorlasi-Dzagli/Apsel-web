@@ -20,6 +20,9 @@ import SubscriptionPlans from "./pages/SubscriptionPlans";
 import ConfirmSubscription from "./pages/ConfirmSubscription";
 import NotFound from "./pages/NotFound";
 import ViewAllBillingHistory from "./pages/ViewAllBillingHistory";
+import OrderStatuses from "./pages/OrderStatuses";
+import CreateOrder from "./pages/CreateOrder";
+
 
 const queryClient = new QueryClient();
 
@@ -43,6 +46,22 @@ const App = () => (
             element={
               <Layout>
                 <Analytics />
+              </Layout>
+            }
+          />
+          <Route
+            path="/orders/statuses"
+            element={
+              <Layout>
+                <OrderStatuses />
+              </Layout>
+            }
+          />
+          <Route
+            path="/orders/create"
+            element={
+              <Layout>
+                <CreateOrder />
               </Layout>
             }
           />
