@@ -131,6 +131,7 @@ const Billing = () => {
                 paymentMethod={paymentMethod}
                 handleSelectPaymentMethod={handleSelectPaymentMethod}
                 setHasPaymentMethod={setHasPaymentMethod}
+                handleAddNew={handleAddNew}
               />
             ) : (
               <NoPaymentMethod

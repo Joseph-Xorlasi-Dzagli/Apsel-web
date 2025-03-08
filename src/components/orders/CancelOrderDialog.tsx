@@ -11,6 +11,18 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { AlertTriangle, Info } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 
 interface CancelOrderDialogProps {
   isOpen: boolean;
@@ -19,17 +31,60 @@ interface CancelOrderDialogProps {
   orderId: string;
 }
 
+// Define validation schema with Zod
+const cancelOrderSchema = z.object({
+  sendNote: z.boolean().default(false),
+  note: z
+    .string()
+    .max(500, "Note must be less than 500 characters")
+    .optional()
+    .refine(
+      (val) => {
+        // If sendNote is true, note must not be empty
+        return val !== "" && val !== undefined;
+      },
+      {
+        message: "Please add a note to the customer",
+        path: ["note"],
+      }
+    ),
+});
+
+type CancelOrderForm = z.infer<typeof cancelOrderSchema>;
+
 export function CancelOrderDialog({
   isOpen,
   onClose,
   onConfirm,
   orderId,
 }: CancelOrderDialogProps) {
-  const [sendNote, setSendNote] = useState(false);
-  const [note, setNote] = useState("");
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
-  const handleConfirm = () => {
-    onConfirm(sendNote, sendNote ? note : undefined);
+  // Initialize form with react-hook-form and zod validation
+  const form = useForm<CancelOrderForm>({
+    resolver: zodResolver(cancelOrderSchema),
+    defaultValues: {
+      sendNote: false,
+      note: "",
+    },
+    mode: "onChange",
+  });
+
+  const watchSendNote = form.watch("sendNote");
+
+  const handleConfirm = (data: CancelOrderForm) => {
+    setSubmitAttempted(true);
+
+    // If sendNote is true but note is empty, show validation error
+    if (data.sendNote && (!data.note || data.note.trim() === "")) {
+      form.setError("note", {
+        type: "manual",
+        message: "Please add a note to the customer",
+      });
+      return;
+    }
+
+    onConfirm(data.sendNote, data.sendNote ? data.note : undefined);
   };
 
   return (
@@ -43,36 +98,78 @@ export function CancelOrderDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3">
-          {sendNote && (
-            <Textarea
-              placeholder="Add note to customer"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="h-24"
-            />
-          )}
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleConfirm)}
+            className="space-y-4">
+            <Alert
+              variant="destructive"
+              className="bg-destructive/10 border-destructive/20">
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+              <AlertDescription>
+                Canceling this order will immediately notify the customer and
+                update their order status.
+              </AlertDescription>
+            </Alert>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="sendNote"
-              checked={sendNote}
-              onCheckedChange={(checked) => setSendNote(checked === true)}
+            <FormField
+              control={form.control}
+              name="sendNote"
+              render={({ field }) => (
+                <FormItem className="flex items-center space-x-2">
+                  <FormControl>
+                    <Checkbox
+                      id="sendNote"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <Label htmlFor="sendNote" className="text-sm">
+                    Send note to customer
+                  </Label>
+                </FormItem>
+              )}
             />
-            <Label htmlFor="sendNote" className="text-sm">
-              Send note to customer
-            </Label>
-          </div>
-        </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleConfirm} variant="destructive">
-            Confirm Cancellation
-          </Button>
-        </DialogFooter>
+            {watchSendNote && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="note"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Add note to customer"
+                          className="h-24"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Alert className="bg-muted">
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    The note will be included in the cancellation email sent to
+                    the customer.
+                  </AlertDescription>
+                </Alert>
+              </>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="destructive">
+                Confirm Cancellation
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

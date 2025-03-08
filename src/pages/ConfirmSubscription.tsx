@@ -1,17 +1,38 @@
-
 import { useState } from "react";
-import { ArrowLeft, Plus, CreditCard, CheckCircle, Check, Receipt } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  CreditCard,
+  CheckCircle,
+  Check,
+  Receipt,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
+import PaymentMethodDetails from "@/components/billing/PaymentMethodDetails";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 const ConfirmSubscription = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [paymentMethod, setPaymentMethod] = useState<string>("gpay");
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
+  const [showAddPaymentMethod, setShowAddPaymentMethod] =
+    useState<boolean>(false);
 
   const handleSubscribe = () => {
     setShowSuccess(true);
@@ -27,6 +48,15 @@ const ConfirmSubscription = () => {
 
   const handleSelectPaymentMethod = (method: string) => {
     setPaymentMethod(method);
+  };
+
+  const handleAddPaymentMethod = (data: any) => {
+    console.log("New payment method added:", data);
+    setShowAddPaymentMethod(false);
+    toast({
+      title: "Payment Method Added",
+      description: "Your new payment method has been added successfully.",
+    });
   };
 
   return (
@@ -168,15 +198,16 @@ const ConfirmSubscription = () => {
               </div>
 
               <div className="flex items-center mt-6">
-                <Button variant="outline" className="gap-2">
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => setShowAddPaymentMethod(true)}>
                   <Plus className="h-4 w-4" />
                   Add New Payment Method
                 </Button>
               </div>
             </CardContent>
           </Card>
-
-
         </div>
 
         <div className="md:col-span-1">
@@ -228,6 +259,22 @@ const ConfirmSubscription = () => {
           </Card>
         </div>
       </div>
+
+      {/* Add Payment Method Sheet */}
+      <Sheet open={showAddPaymentMethod} onOpenChange={setShowAddPaymentMethod}>
+        <SheetContent className="sm:max-w-md overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Add Payment Method</SheetTitle>
+          </SheetHeader>
+          <div className="mt-6">
+            <PaymentMethodDetails
+              onClose={() => setShowAddPaymentMethod(false)}
+              onSave={handleAddPaymentMethod}
+              isStandalone={true}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
