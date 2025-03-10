@@ -1,9 +1,14 @@
-
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Order, sampleOrders, sampleProducts } from "@/lib/data";
+import { Order, OrderStatus, sampleOrders, sampleProducts } from "@/lib/data";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -16,38 +21,43 @@ import {
   AlarmClock,
   XCircle,
   FileText,
+  Tag,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { CancelOrderDialog } from "@/components/orders/CancelOrderDialog";
 import { PrintOrderDialog } from "@/components/orders/PrintOrderDialog";
+import { OrderStatusDialog } from "@/components/orders/OrderStatusDialog";
 
 // Helper function to generate random order items
 const generateOrderItems = (orderId: string) => {
   const randomCount = Math.floor(Math.random() * 3) + 1; // 1-3 items
   const items = [];
-  
+
   // Find the order to get the total
-  const order = sampleOrders.find(o => o.id === orderId);
+  const order = sampleOrders.find((o) => o.id === orderId);
   if (!order) return [];
-  
+
   // Get random products to assign to this order
   const availableProducts = [...sampleProducts];
   let remainingTotal = order.total * 0.85; // Assume 15% goes to shipping & fees
-  
+
   for (let i = 0; i < randomCount; i++) {
     const randomIndex = Math.floor(Math.random() * availableProducts.length);
     const product = availableProducts[randomIndex];
-    
+
     if (product) {
       const quantity = Math.floor(Math.random() * 2) + 1;
       const itemTotal = product.price * quantity;
-      
+
       // Adjust to make sure we don't exceed the order total
-      const adjustedItemTotal = i === randomCount - 1 ? remainingTotal : Math.min(itemTotal, remainingTotal * 0.7);
+      const adjustedItemTotal =
+        i === randomCount - 1
+          ? remainingTotal
+          : Math.min(itemTotal, remainingTotal * 0.7);
       const adjustedPrice = adjustedItemTotal / quantity;
-      
+
       items.push({
         id: `${orderId}-item-${i}`,
         productId: product.id,
@@ -55,16 +65,16 @@ const generateOrderItems = (orderId: string) => {
         price: adjustedPrice,
         quantity,
         total: adjustedItemTotal,
-        image: product.image
+        image: product.image,
       });
-      
+
       remainingTotal -= adjustedItemTotal;
-      
+
       // Remove this product so we don't select it again
       availableProducts.splice(randomIndex, 1);
     }
   }
-  
+
   return items;
 };
 
@@ -78,33 +88,36 @@ const OrderDetail = () => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [isCanceledOrder, setIsCanceledOrder] = useState(false);
+
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
-  
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+
   useEffect(() => {
     if (id) {
       // Find the order in our sample data
-      const foundOrder = sampleOrders.find(order => order.id === id);
-      
+      const foundOrder = sampleOrders.find((order) => order.id === id);
+
       if (foundOrder) {
         setOrder(foundOrder);
-        
+
         // Generate random order items
         const items = generateOrderItems(id);
         setOrderItems(items);
-        
+
         // Calculate shipping fee and tax
         const subtotal = items.reduce((sum, item) => sum + item.total, 0);
         const calculatedShippingFee = foundOrder.total * 0.1; // 10% of total
         const calculatedTax = foundOrder.total * 0.05; // 5% of total
-        
+
         setShippingFee(calculatedShippingFee);
         setTax(calculatedTax);
       }
-      
+
       setLoading(false);
     }
   }, [id]);
-  
+
   const handlePrint = () => {
     setIsPrintDialogOpen(true);
   };
@@ -126,6 +139,7 @@ const OrderDetail = () => {
     });
 
     setIsCancelDialogOpen(false);
+    setIsCanceledOrder(true);
   };
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -141,7 +155,28 @@ const OrderDetail = () => {
         return null;
     }
   };
-  
+
+  // Open status change dialog
+  const handleOpenStatusDialog = () => {
+    setIsStatusDialogOpen(true);
+  };
+
+  const handleUpdateStatus = (
+    newStatus: OrderStatus,
+    sendNote: boolean,
+    note?: string
+  ) => {
+    // In a real app, this would call an API to update the status
+    console.log(`Updating ${order.id} orders to status: ${newStatus}`);
+    console.log(`Send note to customer: ${sendNote ? "Yes" : "No"}`);
+    if (note) {
+      console.log(`Note: ${note}`);
+    }
+
+    // Close the dialog, clear selections, and hide controls
+    setIsStatusDialogOpen(false);
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("en-US", {
@@ -152,7 +187,7 @@ const OrderDetail = () => {
       minute: "numeric",
     }).format(date);
   };
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -160,19 +195,21 @@ const OrderDetail = () => {
       </div>
     );
   }
-  
+
   if (!order) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <h2 className="text-2xl font-bold mb-2">Order Not Found</h2>
-        <p className="text-muted-foreground mb-4">The order you're looking for doesn't exist.</p>
+        <p className="text-muted-foreground mb-4">
+          The order you're looking for doesn't exist.
+        </p>
         <Button asChild>
           <Link to="/orders">Back to Orders</Link>
         </Button>
       </div>
     );
   }
-  
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
@@ -196,16 +233,6 @@ const OrderDetail = () => {
             Print
           </Button>
         </div>
-
-        {order.status !== "canceled" && (
-          <Button
-            variant="outline"
-            className="text-destructive hover:bg-destructive/10"
-            onClick={() => setIsCancelDialogOpen(true)}>
-            <XCircle className="mr-2 h-4 w-4" />
-            Cancel Order
-          </Button>
-        )}
       </div>
 
       <div
@@ -217,12 +244,14 @@ const OrderDetail = () => {
             <CardHeader className="pb-3">
               <div className="flex justify-between items-center">
                 <div>
-                  <CardTitle>Order Summary</CardTitle>
+                  <CardTitle>Cart</CardTitle>
                   <CardDescription>Order details and items</CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
                   {getStatusIcon(order.status)}
-                  <Badge className={`status-${order.status}`}>
+                  <Badge
+                    className={`status-${order.status} cursor-pointer`}
+                    onClick={handleOpenStatusDialog}>
                     {order.status.charAt(0).toUpperCase() +
                       order.status.slice(1)}
                   </Badge>
@@ -329,7 +358,7 @@ const OrderDetail = () => {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Customer Information</CardTitle>
+              <CardTitle className="text-base">Order Summary</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -374,11 +403,17 @@ const OrderDetail = () => {
                   </>
                 )}
 
-                <Button className="w-full mt-2" variant="outline" asChild>
-                  <Link to="#">
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    View Customer Profile
-                  </Link>
+                <Button
+                  className="w-full mt-2 text-destructive hover:bg-destructive/10"
+                  variant="outline"
+                  onClick={() => setIsCancelDialogOpen(true)}
+                  disabled={
+                    isCanceledOrder === true || order.status === "canceled"
+                  }>
+                  {/* <Link to="#"> */}
+                  <XCircle className="mr-2 h-4 w-4" />
+                  Cancel Order
+                  {/* </Link> */}
                 </Button>
               </div>
             </CardContent>
@@ -466,6 +501,13 @@ const OrderDetail = () => {
         isOpen={isPrintDialogOpen}
         onClose={() => setIsPrintDialogOpen(false)}
         order={order}
+      />
+      {/* Status Change Dialog */}
+      <OrderStatusDialog
+        isOpen={isStatusDialogOpen}
+        onClose={() => setIsStatusDialogOpen(false)}
+        onConfirm={handleUpdateStatus}
+        orderId={order.id}
       />
     </div>
   );

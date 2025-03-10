@@ -237,7 +237,9 @@ export default function OrderStatuses() {
             <h1 className="text-2xl font-bold tracking-tight">
               Order Statuses
             </h1>
-            <p className="text-muted-foreground">Manage order status labels</p>
+            <p className="text-muted-foreground">
+              Create and manage up to 7 order status labels for your orders.
+            </p>
           </div>
         </div>
         <Button
@@ -248,13 +250,7 @@ export default function OrderStatuses() {
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Order Status Labels</CardTitle>
-          <CardDescription>
-            Create and manage up to 7 order status labels for your orders.
-          </CardDescription>
-        </CardHeader>
+      <Card className="border-none">
         <CardContent>
           <div className="space-y-4">
             {statuses.length === 0 && (

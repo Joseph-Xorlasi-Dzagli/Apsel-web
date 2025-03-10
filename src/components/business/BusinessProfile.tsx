@@ -60,6 +60,17 @@ const addressSchema = z.object({
   postalCode: z.string().min(3, "Postal code must be at least 3 characters"),
 });
 
+// Added payment schema
+const paymentSchema = z.object({
+  accountNumber: z
+    .string()
+    .min(8, "Account number must be at least 8 characters"),
+  accountHolder: z
+    .string()
+    .min(2, "Account holder name must be at least 2 characters"),
+  bankName: z.string().min(2, "Bank name must be at least 2 characters"),
+});
+
 const BusinessProfile = () => {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(true);
@@ -75,7 +86,11 @@ const BusinessProfile = () => {
     email: "hello@halallab.co",
     phone: "408-841-0926",
     whatsapp: "+233206252066",
-    paymentAccount: "2134 xxxx xxxx",
+    paymentAccount: {
+      accountNumber: "2134 xxxx xxxx",
+      accountHolder: "Joseph Akurugu Avoka",
+      bankName: "GCB Bank",
+    },
     address: {
       street: "3891 Ranchview Dr.",
       city: "Richardson",
@@ -113,6 +128,16 @@ const BusinessProfile = () => {
       state: businessData.address.state,
       country: businessData.address.country,
       postalCode: businessData.address.postalCode,
+    },
+  });
+
+  // Fixed payment form with proper resolver and field names
+  const paymentForm = useForm({
+    resolver: zodResolver(paymentSchema),
+    defaultValues: {
+      accountNumber: businessData.paymentAccount.accountNumber,
+      accountHolder: businessData.paymentAccount.accountHolder,
+      bankName: businessData.paymentAccount.bankName,
     },
   });
 
@@ -156,11 +181,17 @@ const BusinessProfile = () => {
   };
 
   const handlePaymentEdit = () => {
-    // Redirect to payment methods page
-    toast({
-      title: "Edit Payment Methods",
-      description: "Redirecting to payment methods management.",
+    setActiveField("payment");
+    paymentForm.reset({
+      accountNumber: businessData.paymentAccount.accountNumber,
+      accountHolder: businessData.paymentAccount.accountHolder,
+      bankName: businessData.paymentAccount.bankName,
     });
+  };
+
+  const handleSavePayment = (data: any) => {
+    setConfirmData({ section: "payment", data });
+    setShowConfirmation(true);
   };
 
   const handleSaveProfile = (data: any) => {
@@ -210,6 +241,15 @@ const BusinessProfile = () => {
           state: data.state,
           country: data.country,
           postalCode: data.postalCode,
+        },
+      }));
+    } else if (section === "payment") {
+      setBusinessData((prev) => ({
+        ...prev,
+        paymentAccount: {
+          accountNumber: data.accountNumber,
+          accountHolder: data.accountHolder,
+          bankName: data.bankName,
         },
       }));
     }
@@ -326,16 +366,6 @@ const BusinessProfile = () => {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium">Contact Information</h3>
-          {activeField !== "contact" && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-brand"
-              onClick={handleContactEdit}>
-              <PencilLine size={16} className="mr-1" />
-              Edit
-            </Button>
-          )}
         </div>
 
         {activeField === "contact" ? (
@@ -421,10 +451,16 @@ const BusinessProfile = () => {
                     <p className="text-xs text-muted-foreground">MANAGER</p>
                     <p className="text-sm">{businessData.manager}</p>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-brand"
+                    onClick={handleContactEdit}>
+                    <PencilLine size={16} />
+                  </Button>
                 </div>
               </CardContent>
-            </Card>
-            <Card>
+
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="text-blue-500">
@@ -436,8 +472,7 @@ const BusinessProfile = () => {
                   </div>
                 </div>
               </CardContent>
-            </Card>
-            <Card>
+
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="text-blue-500">
@@ -452,58 +487,124 @@ const BusinessProfile = () => {
                 </div>
               </CardContent>
             </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="text-green-500">
-                    <MessageSquare size={20} />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-muted-foreground">
-                      WHATSAPP ACCOUNT
-                    </p>
-                    <p className="text-sm">{businessData.whatsapp}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         )}
 
         <div className="flex items-center justify-between mt-6">
-          <h3 className="text-lg font-medium">Payment & Location</h3>
-          {activeField !== "address" && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-brand"
-              onClick={handleAddressEdit}>
-              <PencilLine size={16} className="mr-1" />
-              Edit
-            </Button>
-          )}
+          <h3 className="text-lg font-medium">Channels</h3>
         </div>
 
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="text-blue-500">
-                <CreditCard size={20} />
+              <div className="text-green-500">
+                <MessageSquare size={20} />
               </div>
               <div className="flex-1">
-                <p className="text-xs text-muted-foreground">PAYMENT ACCOUNT</p>
-                <p className="text-sm">{businessData.paymentAccount}</p>
+                <p className="text-xs text-muted-foreground">
+                  WHATSAPP ACCOUNT
+                </p>
+                <p className="text-sm">{businessData.whatsapp}</p>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-brand"
-                onClick={handlePaymentEdit}>
-                <PencilLine size={16} />
-              </Button>
             </div>
           </CardContent>
         </Card>
+
+        <div className="flex items-center justify-between mt-6">
+          <h3 className="text-lg font-medium">Payment Account</h3>
+        </div>
+
+        {activeField === "payment" ? (
+          <Card className="p-4">
+            <Form {...paymentForm}>
+              <form
+                onSubmit={paymentForm.handleSubmit(handleSavePayment)}
+                className="space-y-4">
+                <FormField
+                  control={paymentForm.control}
+                  name="accountNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Label>ACCOUNT NUMBER</Label>
+                      <FormControl>
+                        <Input {...field} placeholder="Enter account number" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={paymentForm.control}
+                  name="accountHolder"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Label>ACCOUNT HOLDER</Label>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter account holder name"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={paymentForm.control}
+                  name="bankName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Label>BANK NAME</Label>
+                      <FormControl>
+                        <Input {...field} placeholder="Enter bank name" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="flex gap-2">
+                  <Button type="submit">Save Changes</Button>
+                  <Button variant="outline" onClick={handleCancel}>
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </Card>
+        ) : (
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="text-blue-500">
+                  <CreditCard size={20} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs text-muted-foreground">
+                    PAYMENT ACCOUNT
+                  </p>
+                  <p className="text-sm">
+                    {businessData.paymentAccount.accountNumber}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {businessData.paymentAccount.accountHolder} •{" "}
+                    {businessData.paymentAccount.bankName}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-brand"
+                  onClick={handlePaymentEdit}>
+                  <PencilLine size={16} />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="flex items-center justify-between mt-3">
+          <h3 className="text-lg font-medium">Address</h3>
+        </div>
 
         {activeField === "address" ? (
           <Card className="p-4">
@@ -607,7 +708,15 @@ const BusinessProfile = () => {
                     {businessData.address.postalCode},{" "}
                     {businessData.address.country}
                   </p>
-                </div>
+                  </div>
+                  {activeField !== "address" && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-brand"
+                      onClick={handleAddressEdit}>
+                      <PencilLine size={16} />
+                    </Button>)}
               </div>
             </CardContent>
           </Card>

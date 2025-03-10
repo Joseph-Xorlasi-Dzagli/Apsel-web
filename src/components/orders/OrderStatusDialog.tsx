@@ -18,8 +18,9 @@ interface OrderStatusDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (status: OrderStatus, sendNote: boolean, note?: string) => void;
-  orderCount: number;
+  orderCount?: number;
   mode?: "status" | "delete";
+  orderId?: string;
 }
 
 export function OrderStatusDialog({
@@ -27,6 +28,7 @@ export function OrderStatusDialog({
   onClose,
   onConfirm,
   orderCount,
+  orderId,
   mode = "status"
 }: OrderStatusDialogProps) {
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus>("processing");
@@ -51,61 +53,106 @@ export function OrderStatusDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {mode === "status" 
-              ? `Change Status for ${orderCount} Order${orderCount > 1 ? 's' : ''}` 
-              : `Cancel and Delete ${orderCount} Order${orderCount > 1 ? 's' : ''}?`}
+            {!orderId
+              ? mode === "status"
+                ? `Change Status for ${orderCount} Order${
+                    orderCount > 1 ? "s" : ""
+                  }`
+                : `Cancel and Delete ${orderCount} Order${
+                    orderCount > 1 ? "s" : ""
+                  }?`
+              : mode === "status"
+              ? `Change Status for Order #${orderId}`
+              : ""}
           </DialogTitle>
           <DialogDescription>
-            {mode === "status" 
-              ? "Select a new status for the selected orders." 
+            {mode === "status"
+              ? "Select a new status for the selected orders."
               : "This action cannot be undone."}
           </DialogDescription>
         </DialogHeader>
-        
+
         {mode === "status" && (
           <div className="grid gap-4 py-4">
             <div className="space-y-3">
-              <div className="flex items-start space-x-3 p-2 rounded-md hover:bg-muted" onClick={() => handleStatusSelect("processing")}>
-                <Checkbox id="processing" checked={selectedStatus === "processing"} />
+              <div
+                className="flex items-start space-x-3 p-2 rounded-md hover:bg-muted"
+                onClick={() => handleStatusSelect("processing")}>
+                <Checkbox
+                  id="processing"
+                  checked={selectedStatus === "processing"}
+                />
                 <div className="grid gap-1.5">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="processing" className="text-base font-medium">Processing</Label>
+                    <Label
+                      htmlFor="processing"
+                      className="text-base font-medium">
+                      Processing
+                    </Label>
                     <div className="h-4 w-4 bg-blue-500 rounded-sm"></div>
                   </div>
-                  <span className="text-sm text-muted-foreground">Order is being processed</span>
+                  <span className="text-sm text-muted-foreground">
+                    Order is being processed
+                  </span>
                 </div>
               </div>
-              
-              <div className="flex items-start space-x-3 p-2 rounded-md hover:bg-muted" onClick={() => handleStatusSelect("completed")}>
-                <Checkbox id="completed" checked={selectedStatus === "completed"} />
+
+              <div
+                className="flex items-start space-x-3 p-2 rounded-md hover:bg-muted"
+                onClick={() => handleStatusSelect("completed")}>
+                <Checkbox
+                  id="completed"
+                  checked={selectedStatus === "completed"}
+                />
                 <div className="grid gap-1.5">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="completed" className="text-base font-medium">Completed</Label>
+                    <Label
+                      htmlFor="completed"
+                      className="text-base font-medium">
+                      Completed
+                    </Label>
                     <div className="h-4 w-4 bg-green-500 rounded-sm"></div>
                   </div>
-                  <span className="text-sm text-muted-foreground">Order has been fulfilled</span>
+                  <span className="text-sm text-muted-foreground">
+                    Order has been fulfilled
+                  </span>
                 </div>
               </div>
-              
-              <div className="flex items-start space-x-3 p-2 rounded-md hover:bg-muted" onClick={() => handleStatusSelect("pending")}>
+
+              <div
+                className="flex items-start space-x-3 p-2 rounded-md hover:bg-muted"
+                onClick={() => handleStatusSelect("pending")}>
                 <Checkbox id="pending" checked={selectedStatus === "pending"} />
                 <div className="grid gap-1.5">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="pending" className="text-base font-medium">Pending</Label>
+                    <Label htmlFor="pending" className="text-base font-medium">
+                      Pending
+                    </Label>
                     <div className="h-4 w-4 bg-yellow-500 rounded-sm"></div>
                   </div>
-                  <span className="text-sm text-muted-foreground">Order is awaiting processing</span>
+                  <span className="text-sm text-muted-foreground">
+                    Order is awaiting processing
+                  </span>
                 </div>
               </div>
-              
-              <div className="flex items-start space-x-3 p-2 rounded-md hover:bg-muted" onClick={() => handleStatusSelect("canceled")}>
-                <Checkbox id="canceled" checked={selectedStatus === "canceled"} />
+
+              <div
+                className="flex items-start space-x-3 p-2 rounded-md hover:bg-muted"
+                onClick={() => handleStatusSelect("canceled")}>
+                <Checkbox
+                  id="canceled"
+                  checked={selectedStatus === "canceled"}
+                />
                 <div className="grid gap-1.5">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="canceled" className="text-base font-medium">Canceled</Label>
+                    <Label htmlFor="canceled" className="text-base font-medium">
+                      Canceled
+                    </Label>
                     <div className="h-4 w-4 bg-red-500 rounded-sm"></div>
                   </div>
-                  <span className="text-sm text-muted-foreground">Order has been canceled</span>
+                  <span className="text-sm text-muted-foreground">
+                    Order has been canceled
+                  </span>
                 </div>
               </div>
             </div>
@@ -115,30 +162,33 @@ export function OrderStatusDialog({
         {/* Note to customer section */}
         <div className="space-y-3">
           {sendNote && (
-            <Textarea 
-              placeholder="Add note to customer" 
+            <Textarea
+              placeholder="Add note to customer"
               value={note}
               onChange={(e) => setNote(e.target.value)}
               className="h-24"
             />
           )}
-          
+
           <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="sendNote" 
-              checked={sendNote} 
+            <Checkbox
+              id="sendNote"
+              checked={sendNote}
               onCheckedChange={(checked) => setSendNote(checked === true)}
             />
-            <Label htmlFor="sendNote" className="text-sm">Send note to customer</Label>
+            <Label htmlFor="sendNote" className="text-sm">
+              Send note to customer
+            </Label>
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button 
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
             onClick={handleConfirm}
-            variant={mode === "delete" ? "destructive" : "default"}
-          >
+            variant={mode === "delete" ? "destructive" : "default"}>
             Confirm
           </Button>
         </DialogFooter>

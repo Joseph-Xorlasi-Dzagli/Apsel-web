@@ -22,7 +22,7 @@ const Dashboard = () => {
         <SalesChart />
         <RecentOrders />
         <TopSellingProducts />
-        <OrderStatusChart />
+        {/* <OrderStatusChart /> */}
       </div>
     </div>
   );

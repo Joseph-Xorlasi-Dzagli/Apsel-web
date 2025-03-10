@@ -12,10 +12,12 @@ import { OrderList } from "@/components/orders/OrderList";
 import { OrderFilters } from "@/components/orders/OrderFilters";
 import { OrderStats } from "@/components/orders/OrderStats";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { PrintOrderDialog } from "@/components/orders/PrintOrderDialog";
 import {
   Search,
   PlusCircle,
   Grid,
+  Printer,
   List as ListIcon,
   Calendar,
   X,
@@ -38,6 +40,7 @@ import { DateRange } from "react-day-picker";
 import { addDays, format, subDays } from "date-fns";
 import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { OrderStatusDialog } from "@/components/orders/OrderStatusDialog";
 
 const Orders = () => {
   const isMobile = useIsMobile();
@@ -51,12 +54,18 @@ const Orders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<"list" | "tile">("list");
   const ordersPerPage = 10;
+  const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
+  const [order, setOrder] = useState<Order | null>(null);
+  
 
   // New state for selected order
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   // New state for active details tab
   const [activeDetailsTab, setActiveDetailsTab] = useState("summary");
+
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+
 
   // For transaction totals
   const [totalTimeframe, setTotalTimeframe] = useState<
@@ -74,6 +83,30 @@ const Orders = () => {
       description: "This feature will be available soon!",
     });
   };
+
+  // Open status change dialog
+  const handleOpenStatusDialog = () => {
+      setIsStatusDialogOpen(true);
+  };
+
+    const handleUpdateStatus = (
+      newStatus: OrderStatus,
+      sendNote: boolean,
+      note?: string
+    ) => {
+      // In a real app, this would call an API to update the status
+      // console.log(
+      //   `Updating ${orderId} orders to status: ${newStatus}`
+      // );
+      console.log(`Send note to customer: ${sendNote ? "Yes" : "No"}`);
+      if (note) {
+        console.log(`Note: ${note}`);
+      }
+
+      // Close the dialog, clear selections, and hide controls
+      setIsStatusDialogOpen(false);
+    };
+
 
   // Handler for selecting an order
   const handleSelectOrder = (order: Order) => {
@@ -232,6 +265,10 @@ const Orders = () => {
     status: "In Transit",
   });
 
+  const handlePrint = () => {
+    setIsPrintDialogOpen(true);
+  };
+
   return (
     <div>
       <div className={"space-y-6"}>
@@ -335,16 +372,26 @@ const Orders = () => {
                       </CardHeader>
                       <CardContent className="h-[700px] overflow-y-auto">
                         <div className="flex justify-between items-center mb-4">
-                          <h3 className="text-lg font-semibold">
-                            Order #{selectedOrder.id}
-                          </h3>
-                          <Badge
+                          <div className="flex flex-row gap-4">
+                            <h3 className="text-lg font-semibold">
+                              Order #{selectedOrder.id}
+                            </h3>
+                            <Badge
+                              variant="outline"
+                              onClick={handleOpenStatusDialog}
+                              className={`${getStatusColor(
+                                selectedOrder.status
+                              )} cursor-pointer`}>
+                              {selectedOrder.status}
+                            </Badge>
+                          </div>
+                          <Button
                             variant="outline"
-                            className={`${getStatusColor(
-                              selectedOrder.status
-                            )}`}>
-                            {selectedOrder.status}
-                          </Badge>
+                            size="sm"
+                            onClick={handlePrint}>
+                            <Printer className="mr-2 h-4 w-4" />
+                            Print
+                          </Button>
                         </div>
 
                         {/* Details Navigation Tabs */}
@@ -713,6 +760,20 @@ const Orders = () => {
           </CardContent>
         </Card>
       </div>
+      {/* Status Change Dialog */}
+      {selectedOrder?.id && (
+        <OrderStatusDialog
+          isOpen={isStatusDialogOpen}
+          onClose={() => setIsStatusDialogOpen(false)}
+          onConfirm={handleUpdateStatus}
+          orderId={selectedOrder.id}
+        />
+      )}
+      <PrintOrderDialog
+        isOpen={isPrintDialogOpen}
+        onClose={() => setIsPrintDialogOpen(false)}
+        order={order}
+      />
     </div>
   );
 };

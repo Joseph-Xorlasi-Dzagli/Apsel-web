@@ -63,28 +63,9 @@ const BusinessHub = () => {
               defaultValue="profile"
               onValueChange={(value) => setActiveTab(value)}
               className="w-full">
-              <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-flex">
-                <TabsTrigger value="profile">Profile</TabsTrigger>
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="insights">Insights</TabsTrigger>
-                <TabsTrigger value="growth">Growth</TabsTrigger>
-              </TabsList>
-
               <div className="p-6">
                 <TabsContent value="profile" className="mt-0 space-y-6">
                   <BusinessProfile />
-                </TabsContent>
-                <TabsContent value="overview" className="mt-0 space-y-6">
-                  <BusinessOverview />
-                </TabsContent>
-                <TabsContent value="insights" className="mt-0 space-y-6">
-                  <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-                    <MarketInsights />
-                    <CompetitorAnalysis />
-                  </div>
-                </TabsContent>
-                <TabsContent value="growth" className="mt-0 space-y-6">
-                  <GrowthOpportunities />
                 </TabsContent>
               </div>
             </Tabs>
