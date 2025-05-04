@@ -21,7 +21,7 @@ const BusinessHub = () => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<string>("profile");
-  const [isFirstTimeUser, setIsFirstTimeUser] = useState(true);
+  const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
 
   const handleCompleteSetup = (data: any) => {
     console.log("Business setup complete with data:", data);

@@ -4,9 +4,9 @@ import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { WizardHeader } from "./setup/WizardHeader";
 import { BusinessProfileStep } from "./setup/BusinessProfileStep";
 import { BusinessContactStep } from "./setup/BusinessContactStep";
-import { PaymentAccountStep } from "./setup/PaymentaccountStep";
+import { PaymentAccountStep } from "./setup/PaymentAccountStep";
 import { BusinessAddressStep } from "./setup/BusinessAddressStep";
-import { generateBusinessEmail } from "./setup/utils";
+import { generateBusinessEmail, isValidEmail } from "./setup/utils";
 import {
   BusinessProfileForm,
   BusinessContactForm,
@@ -74,14 +74,14 @@ const BusinessSetupWizard = ({
   };
 
   // Pre-populate email for contact step
-  const getContactDefaultValues = (): Partial<BusinessContactForm> => {
-    if (formData.name) {
-      return {
-        email: generateBusinessEmail(formData.name),
-      };
-    }
-    return {};
-  };
+  // const getContactDefaultValues = (): Partial<BusinessContactForm> => {
+  //   if (formData.email) {
+  //     return {
+  //       email: isValidEmail(formData.email),
+  //     };
+  //   }
+  //   return {};
+  // };
 
   const renderCurrentStep = () => {
     switch (step) {
@@ -98,7 +98,8 @@ const BusinessSetupWizard = ({
           <BusinessContactStep
             onNext={handleNextStep}
             onPrevious={handlePreviousStep}
-            defaultValues={{ ...formData, ...getContactDefaultValues() }}
+            defaultValues={{ ...formData}}
+            // defaultValues={{ ...formData, ...getContactDefaultValues() }}
           />
         );
       case 3:

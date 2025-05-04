@@ -21,3 +21,24 @@ export const generateBusinessEmail = (businessName: string = "business") => {
   const sanitizedName = businessName.toLowerCase().replace(/[^a-z0-9]/g, "");
   return `contact@${sanitizedName}.com`;
 };
+
+export const formatPhoneNumber = (value: string) => {
+  // Remove all non-numeric characters
+  const phoneNumber = value.replace(/\D/g, "");
+
+  // Format as (XXX) XXX-XXXX for US numbers
+  if (phoneNumber.length >= 10) {
+    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(
+      3,
+      6
+    )}-${phoneNumber.slice(6, 10)}`;
+  }
+
+  return value;
+};
+
+// Validate email format
+export const isValidEmail = (email: string) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};

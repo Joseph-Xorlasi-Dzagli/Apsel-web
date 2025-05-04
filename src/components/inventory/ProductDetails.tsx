@@ -16,6 +16,7 @@ import { Upload, PackageOpen, ArrowLeft, X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 
+
 type Mode = "view" | "edit" | "add";
 
 interface ProductDetailsProps {
@@ -167,6 +168,16 @@ export function ProductDetails({
         availableForDelivery: productCopy.availableForDelivery || false,
         availableForPickup: productCopy.availableForPickup || true,
       };
+
+
+      // Extract unique categories from existing products
+      const uniqueCategories = Array.from(
+        new Set(existingProducts.map((prod) => prod.category))
+      );
+
+      // Log the unique categories for debugging or further use
+      console.log("Unique Categories:", uniqueCategories);
+
 
       // Set form data to this standard option
       setFormData(standardOption);
@@ -384,40 +395,54 @@ export function ProductDetails({
                 <p className="text-xs text-muted-foreground">20 chars max</p>
               )} */}
 
-              {isNewProduct && (
-                <div className="mb-4 relative">
-                <Label htmlFor="name">PRODUCT NAME</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData?.name || ""}
-                  onChange={(e) => {
-                  handleInputChange(e);
-                  setShowExistingProductsList(true);
-                  }}
-                  placeholder="Type to search for existing products or enter a new name"
-                  className="mb-2"
-                />
-                {showExistingProductsList && existingProducts.length > 0 && (
-                  <div className="absolute z-10 bg-white border rounded-md shadow-lg w-full max-h-60 overflow-y-auto">
-                  {existingProducts
-                    .filter((prod) =>
-                    prod.name
-                      .toLowerCase()
-                      .includes(formData?.name.toLowerCase() || "")
-                    )
-                    .map((prod) => (
-                    <div
-                      key={prod.id}
-                      className="p-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => handleSelectExistingProduct(prod)}>
-                      {prod.name}
-                    </div>
-                    ))}
-                  </div>
-                )}
+            {isNewProduct && (
+              <div>
+                <div className="mb-4">
+                  <Label htmlFor="name">PRODUCT NAME</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={formData?.name || ""}
+                    onChange={handleInputChange}
+                    placeholder="Enter product name"
+                    className="mb-2"
+                  />
                 </div>
-              )}
+
+                <div className="mb-4">
+                  <Label htmlFor="category">CATEGORY</Label>
+                  <select
+                    id="category"
+                    name="category"
+                    value={formData?.category || ""}
+                    onChange={(e) =>
+                      setFormData((prev) => {
+                        if (!prev) return null;
+                        return {
+                          ...prev,
+                          category: e.target.value,
+                        };
+                      })
+                    }
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base  ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm">
+                    <option value="" disabled className="text-gray-500">
+                      Select a category
+                    </option>
+                    {existingProducts
+                      .map((prod) => prod.category)
+                      .filter(
+                        (category, index, self) =>
+                          self.indexOf(category) === index
+                      ) // Remove duplicates
+                      .map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label>UPLOAD PHOTO</Label>

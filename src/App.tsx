@@ -23,6 +23,7 @@ import ViewAllBillingHistory from "./pages/ViewAllBillingHistory";
 import OrderStatuses from "./pages/OrderStatuses";
 import CreateOrder from "./pages/CreateOrder";
 import Auth from "./pages/Auth";
+import Customers from "./pages/Customers";
 
 
 const queryClient = new QueryClient();
@@ -34,12 +35,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route
-            path="/auth"
-            element={<Auth />
-
-            }
-          />
+          <Route path="/auth" element={<Auth />} />
           <Route
             path="/"
             element={
@@ -149,6 +145,14 @@ const App = () => (
             element={
               <Layout>
                 <SubscriptionPlans />
+              </Layout>
+            }
+          />
+          <Route
+            path="/customers"
+            element={
+              <Layout>
+                <Customers />
               </Layout>
             }
           />

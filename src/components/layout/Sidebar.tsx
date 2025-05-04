@@ -14,7 +14,8 @@ import {
   PackageSearch,
   Store,
   Menu,
-  LineChart
+  LineChart,
+  Users
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -83,6 +84,13 @@ export function Sidebar() {
           onClick={closeMobileMenu}
         />
         <SidebarItem
+          icon={<PackageSearch size={20} />}
+          label="Inventory"
+          path="/inventory"
+          active={location.pathname.startsWith("/inventory")}
+          onClick={closeMobileMenu}
+        />
+        <SidebarItem
           icon={<ShoppingBag size={20} />}
           label="Orders"
           path="/orders"
@@ -90,10 +98,10 @@ export function Sidebar() {
           onClick={closeMobileMenu}
         />
         <SidebarItem
-          icon={<PackageSearch size={20} />}
-          label="Inventory"
-          path="/inventory"
-          active={location.pathname.startsWith("/inventory")}
+          icon={<Users size={20} />}
+          label="Customers"
+          path="/customers"
+          active={location.pathname.startsWith("/customers")}
           onClick={closeMobileMenu}
         />
         {/* <SidebarItem 
