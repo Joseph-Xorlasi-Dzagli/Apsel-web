@@ -23,6 +23,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ApselLogo from "@/components/img/apsel.png";
+import { useNavigate } from "react-router-dom";
+import { getAuth, signOut } from "firebase/auth";
 
 interface SidebarItemProps {
   icon: React.ReactNode;
@@ -33,6 +35,7 @@ interface SidebarItemProps {
 }
 
 const SidebarItem = ({ icon, label, path, active, onClick }: SidebarItemProps) => {
+    
   return (
     <Link 
       to={path} 
@@ -55,12 +58,29 @@ export function Sidebar() {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
-  const handleLogout = () => {
-    toast({
-      title: "Logged out successfully",
-      description: "You have been logged out of your account"
-    });
+  const handleLogout = async () => {
+    try {
+      const auth = getAuth();
+      await signOut(auth);
+
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account",
+      });
+
+      // Redirect to login page or home page after logout
+      navigate("/auth");
+    } catch (error) {
+      console.error("Error signing out: ", error);
+
+      toast({
+        title: "Logout failed",
+        description: "There was a problem logging you out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const closeMobileMenu = () => {
@@ -79,8 +99,8 @@ export function Sidebar() {
         <SidebarItem
           icon={<LayoutDashboard size={20} />}
           label="Dashboard"
-          path="/analytics"
-          active={location.pathname === "/analytics"}
+          path="/"
+          active={location.pathname === "/"}
           onClick={closeMobileMenu}
         />
         <SidebarItem

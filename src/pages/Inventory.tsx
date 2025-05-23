@@ -1,250 +1,73 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Products } from "@/components/inventory/Products";
 import { Categories } from "@/components/inventory/Categories";
 import { Button } from "@/components/ui/button";
 import { Plus, Grid, List as ListIcon } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { Product, ProductOption, Category, sampleProducts, sampleCategories } from "@/lib/data";
-import { ProductDetails } from "@/components/inventory/ProductDetails";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useInventory } from "@/hooks/useInventory";
+// import { Spinner } from "@/components/ui/spinner";
 
 const Inventory = () => {
-  const [activeTab, setActiveTab] = useState<"products" | "categories">("products");
+  const [activeTab, setActiveTab] = useState<"products" | "categories">(
+    "products"
+  );
   const [viewMode, setViewMode] = useState<"list" | "tile">("list");
-  
-  // Product state
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedOption, setSelectedOption] = useState<ProductOption | null>(null);
-  const [detailsMode, setDetailsMode] = useState<"view" | "edit" | "add">("view");
-  
-  // Category state
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [categoryDetailsMode, setCategoryDetailsMode] = useState<"view" | "edit" | "add">("view");
-  
-  const { toast } = useToast();
-  const [productNameInput, setProductNameInput] = useState("");
-  const [existingProducts, setExistingProducts] = useState<Product[]>([]);
-  const [showExistingProductsList, setShowExistingProductsList] = useState(false);
 
-  useEffect(() => {
-    // When productNameInput changes, filter existing products for autocomplete
-    if (productNameInput.length > 1) {
-      const matchingProducts = sampleProducts.filter(p => 
-        p.name.toLowerCase().includes(productNameInput.toLowerCase())
-      );
-      setExistingProducts(matchingProducts);
-      setShowExistingProductsList(matchingProducts.length > 0);
-    } else {
-      setExistingProducts([]);
-      setShowExistingProductsList(false);
-    }
-  }, [productNameInput]);
+  const {
+    // Data
+    products,
+    filteredProducts,
+    categories,
+    selectedProduct,
+    selectedOption,
+    selectedCategory,
+    loading,
 
-  const handleAddNew = () => {
+    // Filters
+    searchTerm,
+    categoryFilter,
+    sortBy,
+    setSearchTerm,
+    setCategoryFilter,
+    setSortBy,
+
+    // Mode Management
+    productDetailsMode,
+    categoryDetailsMode,
+    setProductDetailsMode,
+    setCategoryDetailsMode,
+
+    // Handler Functions
+    handleAddNew,
+    handleProductSelect,
+    handleOptionSelect,
+    handleCategorySelect,
+    handleAddOption,
+    handleProductSave,
+    handleOptionSave,
+    handleProductDelete,
+    handleOptionDelete,
+    handleCategorySave,
+    handleCategoryDelete,
+    handleCloseProductDetails,
+    handleCloseCategoryDetails,
+  } = useInventory();
+
+  const handleAddNewClick = () => {
     if (activeTab === "products") {
-      // No longer require a category to be selected
-      setDetailsMode("add");
-      setSelectedProduct(null);
-      setSelectedOption(null);
-      setProductNameInput("");
+      handleAddNew("product");
     } else {
-      setCategoryDetailsMode("add");
-      setSelectedCategory(null);
+      handleAddNew("category");
     }
   };
 
-  const handleProductSelect = (product: Product) => {
-    setSelectedProduct(product);
-    // Select the standard option by default
-    const standardOption = product.options?.find(opt => opt.name === "Standard") || product.options?.[0] || null;
-    setSelectedOption(standardOption);
-    setDetailsMode("view");
-  };
-
-  const handleOptionSelect = (option: ProductOption) => {
-    setSelectedOption(option);
-    setDetailsMode("view");
-  };
-
-  const handleAddOption = () => {
-    if (!selectedProduct) return;
-    setSelectedOption(null);
-    setDetailsMode("add");
-  };
-
-  const handleProductSave = (updatedProduct: Product) => {
-    // In a real app, this would update the backend
-    toast({
-      title: "Success",
-      description: `Product ${detailsMode === "add" ? "added" : "updated"} successfully!`,
-    });
-    
-    if (detailsMode === "add") {
-      // Create a new product, using the selected category if available
-      const newProduct: Product = {
-        ...updatedProduct,
-        id: `product-${Date.now()}`,
-        // Use selected category if available, otherwise use a default
-        category: selectedCategory ? selectedCategory.name : "Uncategorized",
-      };
-      setSelectedProduct(newProduct);
-      setDetailsMode("view");
-    }
-  };
-
-  const handleOptionSave = (option: ProductOption) => {
-    // In a real app, this would update the backend
-    toast({
-      title: "Success",
-      description: `Product option ${detailsMode === "add" ? "added" : "updated"} successfully!`,
-    });
-    
-    if (detailsMode === "add" && selectedProduct) {
-      // Simulate adding the option to the product
-      const newOption: ProductOption = {
-        ...option,
-        id: `option-${Date.now()}`,
-        productId: selectedProduct.id,
-      };
-      setSelectedOption(newOption);
-      setDetailsMode("view");
-    } else if (detailsMode === "edit") {
-      setSelectedOption(option);
-      setDetailsMode("view");
-    }
-  };
-
-  const handleProductDelete = (productId: string) => {
-    // In a real app, this would delete from the backend
-    toast({
-      title: "Success",
-      description: "Product deleted successfully!",
-    });
-    setSelectedProduct(null);
-    setSelectedOption(null);
-  };
-
-  const handleOptionDelete = (optionId: string) => {
-    // In a real app, this would delete from the backend
-    toast({
-      title: "Success",
-      description: "Product option deleted successfully!",
-    });
-    
-    if (selectedProduct && selectedProduct.options) {
-      // If we delete the currently selected option, select the standard one instead
-      const standardOption = selectedProduct.options.find(opt => opt.name === "Standard" && opt.id !== optionId);
-      if (standardOption) {
-        setSelectedOption(standardOption);
-      } else if (selectedProduct.options.length > 1) {
-        // If no standard option, select the first one that's not the deleted one
-        const firstOption = selectedProduct.options.find(opt => opt.id !== optionId);
-        setSelectedOption(firstOption || null);
-      } else {
-        setSelectedOption(null);
-      }
-    }
-  };
-
-  const handleCloseDetails = () => {
-    if (detailsMode === "add") {
-      // If adding a new product, clear everything
-      if (!selectedProduct) {
-        setSelectedProduct(null);
-        setSelectedOption(null);
-        setDetailsMode("view");
-        setProductNameInput("");
-        setShowExistingProductsList(false);
-      } else {
-        // If adding an option, go back to view mode for the selected product
-        setDetailsMode("view");
-        if (selectedProduct && selectedProduct.options?.length) {
-          setSelectedOption(selectedProduct.options[0]);
-        }
-      }
-    } else if (detailsMode === "edit" && selectedOption) {
-      setDetailsMode("view");
-    }
-  };
-
-  // Category handlers
-  const handleCategorySelect = (category: Category) => {
-    setSelectedCategory(category);
-    setCategoryDetailsMode("view");
-  };
-
-  const handleCategorySave = (category: Category) => {
-    // In a real app, this would update the backend
-    toast({
-      title: "Success",
-      description: `Category ${categoryDetailsMode === "add" ? "added" : "updated"} successfully!`,
-    });
-    
-    if (categoryDetailsMode === "add") {
-      // Simulate adding a new category
-      const newCategory: Category = {
-        ...category,
-        id: `category-${Date.now()}`,
-      };
-      setSelectedCategory(newCategory);
-      setCategoryDetailsMode("view");
-    } else {
-      setSelectedCategory(category);
-      setCategoryDetailsMode("view");
-    }
-  };
-
-  const handleCategoryDelete = (categoryId: string) => {
-    // In a real app, this would delete from the backend
-    toast({
-      title: "Success",
-      description: "Category deleted successfully!",
-    });
-    setSelectedCategory(null);
-  };
-
-  const handleCloseCategoryDetails = () => {
-    if (categoryDetailsMode === "add") {
-      setSelectedCategory(null);
-      setCategoryDetailsMode("view");
-    } else if (categoryDetailsMode === "edit") {
-      setCategoryDetailsMode("view");
-    }
-  };
-
-  const handleSelectExistingProduct = (product: Product) => {
-    if (detailsMode === "add") {
-      // Create a copy of the selected product with the new category if selected
-      const productCopy: Product = {
-        ...product,
-        id: `product-${Date.now()}`, // New ID for the copy
-        // Use selected category if available, otherwise keep the original category
-        category: selectedCategory ? selectedCategory.name : product.category,
-        options: product.options ? product.options.map(option => ({
-          ...option,
-          id: `option-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-          productId: `product-${Date.now()}`
-        })) : []
-      };
-      setSelectedProduct(productCopy);
-      setProductNameInput(product.name);
-      setShowExistingProductsList(false);
-      
-      // Set to view mode to show the newly added product
-      setDetailsMode("view");
-      
-      // Select the standard option by default
-      const standardOption = productCopy.options?.find(opt => opt.name === "Standard") || productCopy.options?.[0] || null;
-      setSelectedOption(standardOption);
-      
-      toast({
-        title: "Success",
-        description: "Product added successfully!",
-      });
-    }
-  };
+  // if (loading && !products.length && !categories.length) {
+  //   return (
+  //     <div className="flex items-center justify-center h-[80vh]">
+  //       <Spinner size="lg" />
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="space-y-6">
@@ -272,7 +95,7 @@ const Inventory = () => {
               <Grid className="h-4 w-4" />
             </Button>
           </div>
-          <Button onClick={handleAddNew}>
+          <Button onClick={handleAddNewClick}>
             <Plus className="mr-2 h-4 w-4" />
             Add New {activeTab === "products" ? "Product" : "Category"}
           </Button>
@@ -283,16 +106,14 @@ const Inventory = () => {
         <div>
           <Tabs
             defaultValue="products"
+            value={activeTab}
             onValueChange={(value) => {
               setActiveTab(value as "products" | "categories");
               // Reset selections when switching tabs
               if (value === "products") {
-                setSelectedCategory(null);
                 setCategoryDetailsMode("view");
               } else {
-                setSelectedProduct(null);
-                setSelectedOption(null);
-                setDetailsMode("view");
+                setProductDetailsMode("view");
               }
             }}>
             <TabsList className="grid w-full grid-cols-2 sm:w-[400px]">
@@ -302,21 +123,33 @@ const Inventory = () => {
             <TabsContent value="products" className="mt-6">
               <Products
                 viewMode={viewMode}
+                products={filteredProducts || []}
+                categories={categories || []}
+                searchTerm={searchTerm}
+                categoryFilter={categoryFilter}
+                sortBy={sortBy}
+                setSearchTerm={setSearchTerm}
+                setCategoryFilter={setCategoryFilter}
+                setSortBy={setSortBy}
                 onProductSelect={handleProductSelect}
                 selectedProduct={selectedProduct}
                 selectedOption={selectedOption}
-                detailsMode={detailsMode}
+                detailsMode={productDetailsMode}
                 handleOptionSave={handleOptionSave}
                 handleOptionDelete={handleOptionDelete}
-                setDetailsMode={setDetailsMode}
-                handleCloseDetails={handleCloseDetails}
+                setDetailsMode={setProductDetailsMode}
+                handleCloseDetails={handleCloseProductDetails}
                 handleAddOption={handleAddOption}
                 handleOptionSelect={handleOptionSelect}
+                handleProductSave={handleProductSave}
+                handleProductDelete={handleProductDelete}
+                loading={loading}
               />
             </TabsContent>
             <TabsContent value="categories" className="mt-6">
-              <Categories 
+              <Categories
                 viewMode={viewMode}
+                categories={categories || []}
                 selectedCategory={selectedCategory}
                 onCategorySelect={handleCategorySelect}
                 detailsMode={categoryDetailsMode}
@@ -324,6 +157,7 @@ const Inventory = () => {
                 handleCategorySave={handleCategorySave}
                 handleCategoryDelete={handleCategoryDelete}
                 handleCloseDetails={handleCloseCategoryDetails}
+                loading={loading}
               />
             </TabsContent>
           </Tabs>

@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -24,23 +23,26 @@ import {
   CreditCard,
   MapPin,
   PencilLine,
-  Save,
-  X,
-  Upload,
-  Building,
-  Store,
+  Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Label } from "@/components/ui/label";
+import { useBusiness } from "@/hooks/useBusiness";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Validation schemas
 const profileSchema = z.object({
   name: z.string().min(2, "Business name must be at least 2 characters"),
   bio: z
     .string()
-    .min(10, "Bio must be at least 10 characters")
-    .max(500, "Bio must be less than 500 characters"),
+    .optional()
+    .refine((val) => !val || val.length >= 10, {
+      message: "Bio must be at least 10 characters if provided",
+    })
+    .refine((val) => !val || val.length <= 500, {
+      message: "Bio must be less than 500 characters",
+    }),
 });
 
 const contactSchema = z.object({
@@ -57,135 +59,220 @@ const addressSchema = z.object({
   city: z.string().min(2, "City must be at least 2 characters"),
   state: z.string().min(2, "State must be at least 2 characters"),
   country: z.string().min(2, "Country must be at least 2 characters"),
-  postalCode: z.string().min(3, "Postal code must be at least 3 characters"),
+  postal_code: z.string().min(3, "Postal code must be at least 3 characters"),
 });
 
 // Added payment schema
 const paymentSchema = z.object({
-  accountNumber: z
+  account_number: z
     .string()
     .min(8, "Account number must be at least 8 characters"),
-  accountHolder: z
+  account_holder: z
     .string()
     .min(2, "Account holder name must be at least 2 characters"),
-  bankName: z.string().min(2, "Bank name must be at least 2 characters"),
+  bank_name: z.string().min(2, "Bank name must be at least 2 characters"),
 });
+
+// Skeleton loader for business profile
+const BusinessProfileSkeleton = () => {
+  return (
+    <div className="space-y-6">
+      <Card className="border-none">
+        <div className="flex flex-col md:flex-row md:items-center gap-6 p-6">
+          <Skeleton className="h-28 w-28 rounded-lg" />
+          <div className="flex-1 space-y-3">
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-6 w-1/2" />
+          </div>
+        </div>
+        <div className="mt-6 p-6">
+          <Skeleton className="h-4 w-1/4 mb-2" />
+          <Skeleton className="h-28 w-full rounded-lg" />
+        </div>
+      </Card>
+
+      <div className="space-y-3">
+        <Skeleton className="h-6 w-1/4 mb-2" />
+        <Card>
+          <div className="p-4 space-y-3">
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+          </div>
+        </Card>
+
+        <Skeleton className="h-6 w-1/4 mt-6 mb-2" />
+        <Card>
+          <div className="p-4">
+            <Skeleton className="h-20 w-full" />
+          </div>
+        </Card>
+
+        <Skeleton className="h-6 w-1/4 mt-6 mb-2" />
+        <Card>
+          <div className="p-4">
+            <Skeleton className="h-20 w-full" />
+          </div>
+        </Card>
+
+        <Skeleton className="h-6 w-1/4 mt-6 mb-2" />
+        <Card>
+          <div className="p-4">
+            <Skeleton className="h-20 w-full" />
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+};
 
 const BusinessProfile = () => {
   const { toast } = useToast();
+  const {
+    business,
+    businessContact,
+    businessAddress,
+    loading,
+    savingData,
+    setSavingData,
+    updateBusiness,
+    updateContact,
+    updateAddress,
+    toggleBusinessStatus,
+  } = useBusiness();
+
   const [isOpen, setIsOpen] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [activeField, setActiveField] = useState<string | null>(null);
   const [confirmData, setConfirmData] = useState<any>(null);
 
-  // Initial business data
-  const [businessData, setBusinessData] = useState({
-    name: "G-Connect Mobile Accessories",
-    bio: "This Food so tasty & delicious. Breakfast so fast Delivered in my place. Chef is very friendly. I'm really like chef for Home Food Order. Thanks.",
-    manager: "Joseph Akurugu Avoka",
-    email: "hello@halallab.co",
-    phone: "408-841-0926",
-    whatsapp: "+233206252066",
-    paymentAccount: {
-      accountNumber: "2134 xxxx xxxx",
-      accountHolder: "Joseph Akurugu Avoka",
-      bankName: "GCB Bank",
-    },
-    address: {
-      street: "3891 Ranchview Dr.",
-      city: "Richardson",
-      state: "California",
-      postalCode: "62539",
-      country: "United States",
-    },
-    industry: "Technology",
-  });
-
-  // Create forms for each section
+  // Initialize forms once data is loaded
   const profileForm = useForm({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: businessData.name,
-      bio: businessData.bio,
+      name: "",
+      bio: "",
     },
   });
 
   const contactForm = useForm({
     resolver: zodResolver(contactSchema),
     defaultValues: {
-      manager: businessData.manager,
-      email: businessData.email,
-      phone: businessData.phone,
-      whatsapp: businessData.whatsapp,
+      manager: "",
+      email: "",
+      phone: "",
+      whatsapp: "",
     },
   });
 
   const addressForm = useForm({
     resolver: zodResolver(addressSchema),
     defaultValues: {
-      street: businessData.address.street,
-      city: businessData.address.city,
-      state: businessData.address.state,
-      country: businessData.address.country,
-      postalCode: businessData.address.postalCode,
+      street: "",
+      city: "",
+      state: "",
+      country: "",
+      postal_code: "",
     },
   });
 
-  // Fixed payment form with proper resolver and field names
   const paymentForm = useForm({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
-      accountNumber: businessData.paymentAccount.accountNumber,
-      accountHolder: businessData.paymentAccount.accountHolder,
-      bankName: businessData.paymentAccount.bankName,
+      account_number: "",
+      account_holder: "",
+      bank_name: "",
     },
   });
 
-  const toggleStoreStatus = () => {
-    setIsOpen(!isOpen);
-    toast({
-      title: `Store is now ${!isOpen ? "Open" : "Closed"}`,
-      description: `You've changed your store status to ${
-        !isOpen ? "Open" : "Closed"
-      }`,
+  // Update form values when data is loaded
+  useEffect(() => {
+    if (business) {
+      setIsOpen(business.is_open);
+      profileForm.reset({
+        name: business.name || "",
+        bio: business.bio || "",
+      });
+    }
+  }, [business, profileForm]);
+
+  useEffect(() => {
+    if (businessContact) {
+      contactForm.reset({
+        manager: businessContact.manager || "",
+        email: businessContact.email || "",
+        phone: businessContact.phone || "",
+        whatsapp: businessContact.whatsapp || "",
+      });
+    }
+  }, [businessContact, contactForm]);
+
+  useEffect(() => {
+    if (businessAddress) {
+      addressForm.reset({
+        street: businessAddress.street || "",
+        city: businessAddress.city || "",
+        state: businessAddress.state || "",
+        country: businessAddress.country || "",
+        postal_code: businessAddress.postal_code || "",
+      });
+    }
+  }, [businessAddress, addressForm]);
+
+  // For payment account, we'd typically have another hook to fetch this data
+  // For now, we'll use dummy data in the UI
+  useEffect(() => {
+    paymentForm.reset({
+      account_number: "2134 xxxx xxxx",
+      account_holder: business?.name || "",
+      bank_name: "GCB Bank",
     });
+  }, [business, paymentForm]);
+
+  const handleStoreToggle = async () => {
+    try {
+      await toggleBusinessStatus();
+      setIsOpen(!isOpen);
+    } catch (error) {
+      console.error("Error toggling store status:", error);
+    }
   };
 
   const handleProfileEdit = () => {
     setActiveField("profile");
     profileForm.reset({
-      name: businessData.name,
-      bio: businessData.bio,
+      name: business?.name || "",
+      bio: business?.bio || "",
     });
   };
 
   const handleContactEdit = () => {
     setActiveField("contact");
     contactForm.reset({
-      manager: businessData.manager,
-      email: businessData.email,
-      phone: businessData.phone,
-      whatsapp: businessData.whatsapp,
+      manager: businessContact?.manager || "",
+      email: businessContact?.email || "",
+      phone: businessContact?.phone || "",
+      whatsapp: businessContact?.whatsapp || "",
     });
   };
 
   const handleAddressEdit = () => {
     setActiveField("address");
     addressForm.reset({
-      street: businessData.address.street,
-      city: businessData.address.city,
-      state: businessData.address.state,
-      country: businessData.address.country,
-      postalCode: businessData.address.postalCode,
+      street: businessAddress?.street || "",
+      city: businessAddress?.city || "",
+      state: businessAddress?.state || "",
+      country: businessAddress?.country || "",
+      postal_code: businessAddress?.postal_code || "",
     });
   };
 
   const handlePaymentEdit = () => {
     setActiveField("payment");
     paymentForm.reset({
-      accountNumber: businessData.paymentAccount.accountNumber,
-      accountHolder: businessData.paymentAccount.accountHolder,
-      bankName: businessData.paymentAccount.bankName,
+      account_number: "2134 xxxx xxxx", // This would come from a payment hook
+      account_holder: business?.name || "",
+      bank_name: "GCB Bank",
     });
   };
 
@@ -213,66 +300,55 @@ const BusinessProfile = () => {
     setActiveField(null);
   };
 
-  const confirmSave = () => {
+  const confirmSave = async () => {
     if (!confirmData) return;
 
     const { section, data } = confirmData;
+    setSavingData(true);
 
-    if (section === "profile") {
-      setBusinessData((prev) => ({
-        ...prev,
-        name: data.name,
-        bio: data.bio,
-      }));
-    } else if (section === "contact") {
-      setBusinessData((prev) => ({
-        ...prev,
-        manager: data.manager,
-        email: data.email,
-        phone: data.phone,
-        whatsapp: data.whatsapp,
-      }));
-    } else if (section === "address") {
-      setBusinessData((prev) => ({
-        ...prev,
-        address: {
-          street: data.street,
-          city: data.city,
-          state: data.state,
-          country: data.country,
-          postalCode: data.postalCode,
-        },
-      }));
-    } else if (section === "payment") {
-      setBusinessData((prev) => ({
-        ...prev,
-        paymentAccount: {
-          accountNumber: data.accountNumber,
-          accountHolder: data.accountHolder,
-          bankName: data.bankName,
-        },
-      }));
+    try {
+      if (section === "profile") {
+        await updateBusiness(data);
+      } else if (section === "contact") {
+        await updateContact(data);
+      } else if (section === "address") {
+        await updateAddress(data);
+      } else if (section === "payment") {
+        // This would typically go through a payment account update service
+        toast({
+          title: "Feature Coming Soon",
+          description:
+            "Payment account updates will be available in a future update.",
+        });
+      }
+
+      setActiveField(null);
+      setShowConfirmation(false);
+    } catch (error) {
+      console.error(`Error updating ${section}:`, error);
+      toast({
+        title: "Update Failed",
+        description: `There was a problem updating your ${section} information.`,
+        variant: "destructive",
+      });
+    } finally {
+      setSavingData(false);
     }
-
-    setActiveField(null);
-    setShowConfirmation(false);
-
-    toast({
-      title: "Profile Updated",
-      description: `Your ${section} information has been updated successfully.`,
-    });
   };
+
+  if (loading) {
+    return <BusinessProfileSkeleton />;
+  }
 
   return (
     <div className="space-y-6">
       <Card className="border-none">
-        <div className="flex flex-col md:flex-row md:items-center gap-6">
+        <div className="flex flex-col md:flex-row md:items-center gap-6 p-6">
           <Avatar className="h-28 w-28 rounded-lg bg-brand-light border border-brand/20">
-            <AvatarImage
-              src="/lovable-uploads/b49be610-428d-44e3-a192-c598d6fc460b.png"
-              alt="G-Connect Logo"
-            />
-            <AvatarFallback className="text-brand text-2xl">GC</AvatarFallback>
+            <AvatarImage src={business?.logo_url || ""} alt="Business Logo" />
+            <AvatarFallback className="text-brand text-2xl">
+              {business?.name?.substring(0, 2) || "BZ"}
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1">
             {activeField === "profile" ? (
@@ -311,8 +387,22 @@ const BusinessProfile = () => {
                     )}
                   />
                   <div className="flex gap-2">
-                    <Button type="submit">Save Changes</Button>
-                    <Button variant="outline" onClick={handleCancel}>
+                    <Button
+                      type="submit"
+                      disabled={!profileForm.formState.isDirty || savingData}>
+                      {savingData ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        "Save Changes"
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleCancel}
+                      disabled={savingData}>
                       Cancel
                     </Button>
                   </div>
@@ -321,7 +411,9 @@ const BusinessProfile = () => {
             ) : (
               <div className="flex flex-col">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">{businessData.name}</h2>
+                  <h2 className="text-xl font-semibold">
+                    {business?.name || "My Business"}
+                  </h2>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -337,7 +429,7 @@ const BusinessProfile = () => {
                     className={`cursor-pointer text-sm px-4 py-1 ${
                       isOpen ? "bg-brand" : ""
                     }`}
-                    onClick={toggleStoreStatus}>
+                    onClick={handleStoreToggle}>
                     {isOpen ? "Open" : "Closed"}
                   </Badge>
                   <span className="text-sm text-muted-foreground">
@@ -351,13 +443,15 @@ const BusinessProfile = () => {
           </div>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-6 p-6">
           <h3 className="text-sm font-semibold text-muted-foreground mb-2">
             ABOUT BUSINESS
           </h3>
           {activeField === "profile" ? null : (
             <div className="relative bg-muted/30 p-4 rounded-lg">
-              <p className="text-sm">{businessData.bio}</p>
+              <p className="text-sm">
+                {business?.bio || "No business description added yet."}
+              </p>
             </div>
           )}
         </div>
@@ -431,8 +525,22 @@ const BusinessProfile = () => {
                   )}
                 />
                 <div className="flex gap-2">
-                  <Button type="submit">Save Changes</Button>
-                  <Button variant="outline" onClick={handleCancel}>
+                  <Button
+                    type="submit"
+                    disabled={!contactForm.formState.isDirty || savingData}>
+                    {savingData ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleCancel}
+                    disabled={savingData}>
                     Cancel
                   </Button>
                 </div>
@@ -449,7 +557,9 @@ const BusinessProfile = () => {
                   </div>
                   <div className="flex-1">
                     <p className="text-xs text-muted-foreground">MANAGER</p>
-                    <p className="text-sm">{businessData.manager}</p>
+                    <p className="text-sm">
+                      {businessContact?.manager || "Not set"}
+                    </p>
                   </div>
                   <Button
                     variant="ghost"
@@ -468,7 +578,9 @@ const BusinessProfile = () => {
                   </div>
                   <div className="flex-1">
                     <p className="text-xs text-muted-foreground">EMAIL</p>
-                    <p className="text-sm">{businessData.email}</p>
+                    <p className="text-sm">
+                      {businessContact?.email || "Not set"}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -482,7 +594,9 @@ const BusinessProfile = () => {
                     <p className="text-xs text-muted-foreground">
                       PHONE NUMBER
                     </p>
-                    <p className="text-sm">{businessData.phone}</p>
+                    <p className="text-sm">
+                      {businessContact?.phone || "Not set"}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -504,7 +618,9 @@ const BusinessProfile = () => {
                 <p className="text-xs text-muted-foreground">
                   WHATSAPP ACCOUNT
                 </p>
-                <p className="text-sm">{businessData.whatsapp}</p>
+                <p className="text-sm">
+                  {businessContact?.whatsapp || "Not set"}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -522,7 +638,7 @@ const BusinessProfile = () => {
                 className="space-y-4">
                 <FormField
                   control={paymentForm.control}
-                  name="accountNumber"
+                  name="account_number"
                   render={({ field }) => (
                     <FormItem>
                       <Label>ACCOUNT NUMBER</Label>
@@ -535,7 +651,7 @@ const BusinessProfile = () => {
                 />
                 <FormField
                   control={paymentForm.control}
-                  name="accountHolder"
+                  name="account_holder"
                   render={({ field }) => (
                     <FormItem>
                       <Label>ACCOUNT HOLDER</Label>
@@ -551,7 +667,7 @@ const BusinessProfile = () => {
                 />
                 <FormField
                   control={paymentForm.control}
-                  name="bankName"
+                  name="bank_name"
                   render={({ field }) => (
                     <FormItem>
                       <Label>BANK NAME</Label>
@@ -563,8 +679,22 @@ const BusinessProfile = () => {
                   )}
                 />
                 <div className="flex gap-2">
-                  <Button type="submit">Save Changes</Button>
-                  <Button variant="outline" onClick={handleCancel}>
+                  <Button
+                    type="submit"
+                    disabled={!paymentForm.formState.isDirty || savingData}>
+                    {savingData ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleCancel}
+                    disabled={savingData}>
                     Cancel
                   </Button>
                 </div>
@@ -582,12 +712,9 @@ const BusinessProfile = () => {
                   <p className="text-xs text-muted-foreground">
                     PAYMENT ACCOUNT
                   </p>
-                  <p className="text-sm">
-                    {businessData.paymentAccount.accountNumber}
-                  </p>
+                  <p className="text-sm">2134 xxxx xxxx</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {businessData.paymentAccount.accountHolder} •{" "}
-                    {businessData.paymentAccount.bankName}
+                    {business?.name || "Account Holder"} • GCB Bank
                   </p>
                 </div>
                 <Button
@@ -672,7 +799,7 @@ const BusinessProfile = () => {
                   />
                   <FormField
                     control={addressForm.control}
-                    name="postalCode"
+                    name="postal_code"
                     render={({ field }) => (
                       <FormItem>
                         <Label>POSTAL CODE</Label>
@@ -685,8 +812,22 @@ const BusinessProfile = () => {
                   />
                 </div>
                 <div className="flex gap-2">
-                  <Button type="submit">Save Changes</Button>
-                  <Button variant="outline" onClick={handleCancel}>
+                  <Button
+                    type="submit"
+                    disabled={!addressForm.formState.isDirty || savingData}>
+                    {savingData ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleCancel}
+                    disabled={savingData}>
                     Cancel
                   </Button>
                 </div>
@@ -702,21 +843,23 @@ const BusinessProfile = () => {
                 </div>
                 <div className="flex-1">
                   <p className="text-xs text-muted-foreground">ADDRESS</p>
-                  <p className="text-sm">
-                    {businessData.address.street}, {businessData.address.city},{" "}
-                    {businessData.address.state}{" "}
-                    {businessData.address.postalCode},{" "}
-                    {businessData.address.country}
-                  </p>
-                  </div>
-                  {activeField !== "address" && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-brand"
-                      onClick={handleAddressEdit}>
-                      <PencilLine size={16} />
-                    </Button>)}
+                  {businessAddress ? (
+                    <p className="text-sm">
+                      {businessAddress.street}, {businessAddress.city},{" "}
+                      {businessAddress.state} {businessAddress.postal_code},{" "}
+                      {businessAddress.country}
+                    </p>
+                  ) : (
+                    <p className="text-sm">No address set</p>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-brand"
+                  onClick={handleAddressEdit}>
+                  <PencilLine size={16} />
+                </Button>
               </div>
             </CardContent>
           </Card>

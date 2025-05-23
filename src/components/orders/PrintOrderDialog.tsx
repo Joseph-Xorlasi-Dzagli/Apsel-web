@@ -11,7 +11,47 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Order } from "@/lib/data";
+
+// Update to match your Firestore Order type
+interface OrderItem {
+  id: string;
+  product_id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  total: number;
+  image?: string;
+}
+
+interface Customer {
+  id?: string;
+  name: string;
+  email?: string;
+  phone?: string;
+}
+
+interface Order {
+  id: string;
+  business_id: string;
+  customer: Customer;
+  status: string;
+  shipping_method: "delivery" | "pickup";
+  shipping_address?: string;
+  city?: string;
+  subtotal: number;
+  shipping_fee: number;
+  tax: number;
+  total: number;
+  payment_method: string;
+  payment_status: string;
+  payment_reference?: string;
+  notes?: string;
+  item_count: number;
+  created_at: Date;
+  updated_at: Date;
+  completed_at?: Date;
+  items?: OrderItem[];
+}
 
 interface PrintOrderDialogProps {
   isOpen: boolean;
@@ -29,6 +69,11 @@ export function PrintOrderDialog({
   const [includeNotes, setIncludeNotes] = useState(true);
   const printFrameRef = useRef<HTMLIFrameElement>(null);
   const { toast } = useToast();
+
+  const formatDate = (date: Date | undefined) => {
+    if (!date) return "N/A";
+    return new Date(date).toLocaleDateString();
+  };
 
   const handlePrint = () => {
     if (!order) return;
@@ -61,15 +106,24 @@ export function PrintOrderDialog({
               </head>
               <body>
                 <h1>Order #${order.id}</h1>
-                <div>Date: ${new Date(order.date).toLocaleDateString()}</div>
+                <div>Date: ${formatDate(order.created_at)}</div>
                 <div>Status: ${order.status}</div>
                 
                 ${
                   includeCustomerDetails
                     ? `
                 <h2>Customer Information</h2>
-                <div>Name: ${order.customerName}</div>
-                <div>Shipping Method: ${order.shippingMethod}</div>
+                <div>Name: ${order.customer?.name || "N/A"}</div>
+                <div>Email: ${order.customer?.email || "N/A"}</div>
+                <div>Phone: ${order.customer?.phone || "N/A"}</div>
+                <div>Shipping Method: ${order.shipping_method}</div>
+                ${
+                  order.shipping_method === "delivery"
+                    ? `<div>Address: ${order.shipping_address || "N/A"}, ${
+                        order.city || ""
+                      }</div>`
+                    : ""
+                }
                 `
                     : ""
                 }
@@ -84,32 +138,28 @@ export function PrintOrderDialog({
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>Sample Item 1</td>
-                      <td>1</td>
-                      ${
-                        includePrices
-                          ? `<td>GHS ${(order.total * 0.6).toFixed(
-                              2
-                            )}</td><td>GHS ${(order.total * 0.6).toFixed(
-                              2
-                            )}</td>`
-                          : ""
-                      }
-                    </tr>
-                    <tr>
-                      <td>Sample Item 2</td>
-                      <td>2</td>
-                      ${
-                        includePrices
-                          ? `<td>GHS ${(order.total * 0.2).toFixed(
-                              2
-                            )}</td><td>GHS ${(order.total * 0.4).toFixed(
-                              2
-                            )}</td>`
-                          : ""
-                      }
-                    </tr>
+                    ${
+                      order.items && order.items.length > 0
+                        ? order.items
+                            .map(
+                              (item) => `
+                        <tr>
+                          <td>${item.name}</td>
+                          <td>${item.quantity}</td>
+                          ${
+                            includePrices
+                              ? `<td>GHS ${item.price.toFixed(2)}</td>
+                             <td>GHS ${item.total.toFixed(2)}</td>`
+                              : ""
+                          }
+                        </tr>
+                      `
+                            )
+                            .join("")
+                        : `<tr><td colspan="${
+                            includePrices ? 4 : 2
+                          }">No items available</td></tr>`
+                    }
                   </tbody>
                 </table>
                 
@@ -120,15 +170,15 @@ export function PrintOrderDialog({
                 <table>
                   <tr>
                     <td>Subtotal</td>
-                    <td>GHS ${(order.total * 0.85).toFixed(2)}</td>
+                    <td>GHS ${order.subtotal.toFixed(2)}</td>
                   </tr>
                   <tr>
                     <td>Shipping</td>
-                    <td>GHS ${(order.total * 0.1).toFixed(2)}</td>
+                    <td>GHS ${order.shipping_fee.toFixed(2)}</td>
                   </tr>
                   <tr>
                     <td>Tax</td>
-                    <td>GHS ${(order.total * 0.05).toFixed(2)}</td>
+                    <td>GHS ${order.tax.toFixed(2)}</td>
                   </tr>
                   <tr style="font-weight: bold;">
                     <td>Total</td>
@@ -140,7 +190,12 @@ export function PrintOrderDialog({
                 }
                 
                 ${
-                  includeNotes
+                  includeNotes && order.notes
+                    ? `
+                <h2>Notes</h2>
+                <p>${order.notes}</p>
+                `
+                    : includeNotes
                     ? `
                 <h2>Notes</h2>
                 <p>Thank you for your order! If you have any questions, please contact us.</p>

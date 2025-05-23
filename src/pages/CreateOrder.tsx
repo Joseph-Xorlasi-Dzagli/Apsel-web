@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -33,7 +33,10 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { sampleProducts } from "@/lib/data";
+import { createOrder } from "@/services/firestoreService"; // Import from services instead of useOrders hook
+import { useProducts } from "@/hooks/useProducts";
+import { OrderItem } from "@/types/order";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Define the form schema
 const formSchema = z.object({
@@ -51,20 +54,23 @@ const formSchema = z.object({
   shippingMethod: z.string(),
 });
 
-// Order item type
-interface OrderItem {
+// Order item type for the form
+interface FormOrderItem {
   id: string;
   productId: string;
+  productOptionId?: string;
   name: string;
   price: number;
   quantity: number;
+  image?: string;
 }
 
 export default function CreateOrder() {
-  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+  const [orderItems, setOrderItems] = useState<FormOrderItem[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { products, loading: productsLoading } = useProducts();
 
   // Initialize the form
   const form = useForm<z.infer<typeof formSchema>>({
@@ -83,19 +89,34 @@ export default function CreateOrder() {
 
   // Add a new order item
   const addOrderItem = () => {
-    if (sampleProducts.length === 0) return;
+    if (products.length === 0) {
+      toast({
+        title: "No products available",
+        description: "You need to add products first before creating an order.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    const randomProduct =
-      sampleProducts[Math.floor(Math.random() * sampleProducts.length)];
+    // Get a random product or the first one
+    const randomProduct = products[Math.floor(Math.random() * products.length)];
+
+    // Get the first option (or use default values if no options)
+    const productOption =
+      randomProduct.options && randomProduct.options.length > 0
+        ? randomProduct.options[0]
+        : { price: 0, name: "Standard" };
 
     setOrderItems([
       ...orderItems,
       {
         id: `item-${Date.now()}`,
         productId: randomProduct.id,
+        productOptionId: productOption.id,
         name: randomProduct.name,
-        price: randomProduct.price,
+        price: productOption.price || 0,
         quantity: 1,
+        image: productOption.image_url,
       },
     ]);
   };
@@ -145,7 +166,7 @@ export default function CreateOrder() {
   };
 
   // Form submission
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (orderItems.length === 0) {
       toast({
         title: "No items added",
@@ -157,18 +178,52 @@ export default function CreateOrder() {
 
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      const orderId = Math.floor(100000 + Math.random() * 900000).toString();
+    try {
+      // Prepare order data
+      const orderData = {
+        customer: {
+          name: values.customerName,
+          email: values.email || undefined,
+          phone: values.phone || undefined,
+        },
+        shipping_method: values.shippingMethod as "delivery" | "pickup",
+        shipping_address: values.address || undefined,
+        city: values.city || undefined,
+        payment_method: values.paymentMethod,
+        payment_status: "unpaid" as const,
+        notes: values.notes || undefined,
+        status: "pending" as const,
+      };
+
+      // Prepare items
+      const items = orderItems.map((item) => ({
+        product_id: item.productId,
+        product_option_id: item.productOptionId,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        total: item.price * item.quantity,
+        image: item.image,
+      }));
+
+      // Create the order using the service function
+      const newOrder = await createOrder(orderData, items);
 
       toast({
         title: "Order Created",
-        description: `Order #${orderId} has been created successfully.`,
+        description: `Order #${newOrder.id} has been created successfully.`,
       });
-
+      navigate(`/orders/${newOrder.id}`);
+    } catch (error) {
+      console.error("Error creating order:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem creating your order.",
+        variant: "destructive",
+      });
+    } finally {
       setLoading(false);
-      navigate(`/orders/${orderId}`);
-    }, 1000);
+    }
   };
 
   return (
@@ -406,13 +461,35 @@ export default function CreateOrder() {
                   Add products to this order. At least one item is required.
                 </CardDescription>
               </div>
-              <Button type="button" onClick={addOrderItem} variant="outline">
+              <Button
+                type="button"
+                onClick={addOrderItem}
+                variant="outline"
+                disabled={productsLoading || products.length === 0}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Item
               </Button>
             </CardHeader>
             <CardContent>
-              {orderItems.length === 0 ? (
+              {productsLoading ? (
+                <div className="flex justify-center py-8">
+                  <p className="text-muted-foreground">Loading products...</p>
+                </div>
+              ) : products.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <Package className="h-10 w-10 text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground">
+                    No products available in your inventory.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-4"
+                    asChild>
+                    <Link to="/inventory">Manage Inventory</Link>
+                  </Button>
+                </div>
+              ) : orderItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <Package className="h-10 w-10 text-muted-foreground mb-3" />
                   <p className="text-muted-foreground">
@@ -433,11 +510,21 @@ export default function CreateOrder() {
                     <div
                       key={item.id}
                       className="flex items-center justify-between p-3 border rounded-md">
-                      <div className="flex-1 mr-4">
-                        <p className="font-medium">{item.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          GHS {item.price.toFixed(2)} each
-                        </p>
+                      <div className="flex items-center gap-3 flex-1 mr-4">
+                        <Avatar className="h-10 w-10 rounded-md border">
+                          {item.image ? (
+                            <AvatarImage src={item.image} alt={item.name} />
+                          ) : null}
+                          <AvatarFallback className="rounded-md">
+                            {item.name.substring(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{item.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            GHS {item.price.toFixed(2)} each
+                          </p>
+                        </div>
                       </div>
 
                       <div className="flex items-center gap-3">
@@ -489,7 +576,9 @@ export default function CreateOrder() {
               <Button variant="outline" asChild>
                 <Link to="/orders">Cancel</Link>
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button
+                type="submit"
+                disabled={loading || orderItems.length === 0}>
                 {loading ? "Creating..." : "Create Order"}
               </Button>
             </CardFooter>

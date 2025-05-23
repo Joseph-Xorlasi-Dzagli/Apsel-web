@@ -6,7 +6,7 @@ import { CustomerType } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { CustomerForm } from "./CustomerForm";
 import { CustomerView } from "./CustomerView";
-import { CustomerFormValues } from "./validation";
+import { CustomerFormValues } from "../../utils/formatters";
 
 interface CustomerDetailsPanelProps {
   customer: CustomerType | null;

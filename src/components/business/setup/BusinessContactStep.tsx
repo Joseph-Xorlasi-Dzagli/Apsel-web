@@ -13,6 +13,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { BusinessContactForm, businessContactSchema } from "./validation";
+import { useEffect } from "react";
+import { generateBusinessEmail } from "./utils";
 
 interface BusinessContactStepProps {
   onNext: (data: BusinessContactForm) => void;
@@ -33,6 +35,14 @@ export const BusinessContactStep = ({
       phone: "",
     },
   });
+
+  // If business name is available in defaultValues, generate a suggested email
+  // useEffect(() => {
+  //   if (!defaultValues?.email && defaultValues?.name) {
+  //     const suggestedEmail = generateBusinessEmail(defaultValues.name);
+  //     form.setValue("email", suggestedEmail);
+  //   }
+  // }, [defaultValues, form]);
 
   return (
     <Card className="border-none shadow-none">

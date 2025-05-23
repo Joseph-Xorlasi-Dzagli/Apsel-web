@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BusinessProfileForm, businessProfileSchema } from "./validation";
+import { industries, employeeCounts } from "./utils";
 
 interface BusinessProfileStepProps {
   onNext: (data: BusinessProfileForm) => void;
@@ -101,16 +102,13 @@ export const BusinessProfileStep = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="retail">Retail</SelectItem>
-                        <SelectItem value="restaurant">Restaurant</SelectItem>
-                        <SelectItem value="technology">Technology</SelectItem>
-                        <SelectItem value="healthcare">Healthcare</SelectItem>
-                        <SelectItem value="education">Education</SelectItem>
-                        <SelectItem value="finance">Finance</SelectItem>
-                        <SelectItem value="manufacturing">
-                          Manufacturing
-                        </SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        {industries.map((industry) => (
+                          <SelectItem
+                            key={industry.value}
+                            value={industry.value}>
+                            {industry.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -136,16 +134,11 @@ export const BusinessProfileStep = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="1-10">1-10 employees</SelectItem>
-                        <SelectItem value="11-50">11-50 employees</SelectItem>
-                        <SelectItem value="51-200">51-200 employees</SelectItem>
-                        <SelectItem value="201-500">
-                          201-500 employees
-                        </SelectItem>
-                        <SelectItem value="501-1000">
-                          501-1000 employees
-                        </SelectItem>
-                        <SelectItem value="1000+">1000+ employees</SelectItem>
+                        {employeeCounts.map((count) => (
+                          <SelectItem key={count.value} value={count.value}>
+                            {count.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

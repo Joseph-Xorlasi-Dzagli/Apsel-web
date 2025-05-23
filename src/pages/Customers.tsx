@@ -6,7 +6,10 @@ import { CustomerDetailsPanel } from "@/components/customers/CustomerDetailsPane
 import { CustomerStats } from "@/components/customers/CustomerStats";
 import { CustomerSearch } from "@/components/customers/CustomerSearch";
 import { CustomerTable } from "@/components/customers/CustomerTable";
-import { useCustomers } from "@/components/customers/useCustomers";
+import { useCustomersData } from "@/hooks/useCustomersData"; // Updated import path
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 const Customers = () => {
   const {
@@ -19,8 +22,56 @@ const Customers = () => {
     isAddingCustomer,
     isDeleteConfirmOpen,
     isEditMode,
+    loading,
+    error,
+    hasMore,
     actions,
-  } = useCustomers();
+  } = useCustomersData();
+
+  // Loading state
+  if (loading && filteredCustomers.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-6">
+        <PageHeader
+          title="Customer Management"
+          description="View and manage your customer database"
+          icon={<Users className="h-6 w-6" />}
+        />
+
+        <div className="grid gap-4 md:grid-cols-3 mb-6">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-[100px]" />
+          ))}
+        </div>
+
+        <div className="flex justify-between mb-6">
+          <Skeleton className="h-10 w-[300px]" />
+          <Skeleton className="h-10 w-[150px]" />
+        </div>
+
+        <Skeleton className="h-[400px] w-full" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-6">
+        <PageHeader
+          title="Customer Management"
+          description="View and manage your customer database"
+          icon={<Users className="h-6 w-6" />}
+        />
+
+        <Alert variant="destructive" className="mb-6">
+          <AlertDescription>{error}. Please try again later.</AlertDescription>
+        </Alert>
+
+        <Button onClick={() => window.location.reload()}>Retry</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -53,6 +104,18 @@ const Customers = () => {
             onEdit={actions.handleEditCustomer}
             onDelete={actions.confirmDelete}
           />
+
+          {/* Load More Button */}
+          {hasMore && filteredCustomers.length > 0 && (
+            <div className="mt-4 text-center">
+              <Button
+                variant="outline"
+                onClick={actions.loadMoreCustomers}
+                disabled={loading}>
+                {loading ? "Loading..." : "Load More"}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Customer Details Panel */}

@@ -1,10 +1,11 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "./components/layout/Layout";
+import { AuthProvider } from "./contexts/AuthContext";
+import AppInitializer from "./components/AppInitializer";
 import Index from "./pages/Index";
 import Analytics from "./pages/Analytics";
 import SalesChartPage from "./pages/SalesChart";
@@ -24,159 +25,200 @@ import OrderStatuses from "./pages/OrderStatuses";
 import CreateOrder from "./pages/CreateOrder";
 import Auth from "./pages/Auth";
 import Customers from "./pages/Customers";
-
+import PrivateRoute from "./components/auth/PrivateRoute";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/auth" element={<Auth />} />
-          <Route
-            path="/"
-            element={
-              <Layout>
-                <Index />
-              </Layout>
-            }
-          />
-          <Route
-            path="/analytics"
-            element={
-              <Layout>
-                <Analytics />
-              </Layout>
-            }
-          />
-          <Route
-            path="/orders/statuses"
-            element={
-              <Layout>
-                <OrderStatuses />
-              </Layout>
-            }
-          />
-          <Route
-            path="/orders/create"
-            element={
-              <Layout>
-                <CreateOrder />
-              </Layout>
-            }
-          />
-          <Route
-            path="/sales-chart"
-            element={
-              <Layout>
-                <SalesChartPage />
-              </Layout>
-            }
-          />
-          <Route
-            path="/orders"
-            element={
-              <Layout>
-                <Orders />
-              </Layout>
-            }
-          />
-          <Route
-            path="/orders/:id"
-            element={
-              <Layout>
-                <OrderDetail />
-              </Layout>
-            }
-          />
-          <Route
-            path="/inventory"
-            element={
-              <Layout>
-                <Inventory />
-              </Layout>
-            }
-          />
-          <Route
-            path="/business-hub"
-            element={
-              <Layout>
-                <BusinessHub />
-              </Layout>
-            }
-          />
-          <Route
-            path="/notifications"
-            element={
-              <Layout>
-                <Notifications />
-              </Layout>
-            }
-          />
-          <Route
-            path="/faqs"
-            element={
-              <Layout>
-                <HelpFAQ />
-              </Layout>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <Layout>
-                <Settings />
-              </Layout>
-            }
-          />
-          <Route
-            path="/billing"
-            element={
-              <Layout>
-                <Billing />
-              </Layout>
-            }
-          />
-          <Route
-            path="/billing/plans"
-            element={
-              <Layout>
-                <SubscriptionPlans />
-              </Layout>
-            }
-          />
-          <Route
-            path="/customers"
-            element={
-              <Layout>
-                <Customers />
-              </Layout>
-            }
-          />
-          <Route
-            path="/billing/history"
-            element={
-              <Layout>
-                <ViewAllBillingHistory />
-              </Layout>
-            }
-          />
-          <Route
-            path="/billing/confirm"
-            element={
-              <Layout>
-                <ConfirmSubscription />
-              </Layout>
-            }
-          />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <AppInitializer>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+
+              {/* Protected Routes */}
+              <Route
+                path="/"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Index />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/analytics"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Analytics />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/orders/statuses"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <OrderStatuses />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/orders/create"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <CreateOrder />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/sales-chart"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <SalesChartPage />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Orders />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/orders/:id"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <OrderDetail />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/inventory"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Inventory />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/business-hub"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <BusinessHub />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/notifications"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Notifications />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/faqs"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <HelpFAQ />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Settings />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/billing"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Billing />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/billing/plans"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <SubscriptionPlans />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/customers"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Customers />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/billing/history"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <ViewAllBillingHistory />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/billing/confirm"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <ConfirmSubscription />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+
+              {/* Redirect to auth if not authenticated */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AppInitializer>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

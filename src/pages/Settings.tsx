@@ -21,44 +21,113 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
+import { useSettings } from "@/hooks/useSettings";
+import { useEffect } from "react";
+
 
 const Settings = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    settings,
+    loading,
+    updateProfile,
+    updateNotificationPreferences,
+    updatePassword,
+  } = useSettings();
+
+  // Local state for form values
   const [profileForm, setProfileForm] = useState({
-    name: "G-Connect Mobile",
-    email: "admin@gconnect.com",
-    phone: "+1 (555) 123-4567",
-    industry: "Technology", // Add initial value for industry
+    name: "",
+    email: "",
+    phone: "",
+    industry: "",
   });
 
+  const [notificationForm, setNotificationForm] = useState({
+    order_notifications: true,
+    inventory_alerts: true,
+    sales_reports: false,
+    marketing_updates: false,
+  });
+
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  // Update local state when settings are loaded
+  useEffect(() => {
+    if (!loading && settings) {
+      setProfileForm({
+        name: settings.profile.name || "",
+        email: settings.profile.email || "",
+        phone: settings.profile.phone || "",
+        industry: settings.profile.industry || "",
+      });
+
+      setNotificationForm({
+        order_notifications: settings.notifications.order_notifications,
+        inventory_alerts: settings.notifications.inventory_alerts,
+        sales_reports: settings.notifications.sales_reports,
+        marketing_updates: settings.notifications.marketing_updates,
+      });
+    }
+  }, [loading, settings]);
+
+  // Handle profile form changes
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfileForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const saveProfile = () => {
-    toast({
-      title: "Profile Updated",
-      description: "Your profile has been successfully updated.",
+  // Handle password form changes
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle notification preference changes
+  const handleNotificationChange = (key: string, value: boolean) => {
+    setNotificationForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  // Save profile changes
+  const saveProfile = async () => {
+    await updateProfile(profileForm);
+  };
+
+  // Save notification preferences
+  const saveNotifications = async () => {
+    await updateNotificationPreferences(notificationForm);
+  };
+
+  // Save password changes
+  const savePassword = async () => {
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      // Show error - passwords don't match
+      return;
+    }
+
+    await updatePassword(
+      passwordForm.currentPassword,
+      passwordForm.newPassword
+    );
+
+    // Reset form after submission
+    setPasswordForm({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
     });
   };
 
-  const saveNotifications = () => {
-    toast({
-      title: "Notification Settings Saved",
-      description: "Your notification preferences have been updated.",
-    });
-  };
-
-  const savePassword = () => {
-    toast({
-      title: "Password Changed",
-      description: "Your password has been successfully changed.",
-    });
-  };
+  // Render loading state
+  if (loading) {
+    return <SettingsLoadingState />;
+  }
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
@@ -97,9 +166,11 @@ const Settings = () => {
             <CardContent className="space-y-6">
               <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src="/public/lovable-uploads/afb7fc95-0412-459d-8b48-a4d8fe164514.png" />
+                  <AvatarImage src={settings.profile.logo_url || ""} />
                   <AvatarFallback className="text-brand bg-brand-light text-2xl">
-                    GC
+                    {settings.profile.name
+                      ? settings.profile.name.charAt(0)
+                      : "B"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="space-y-2">
@@ -137,6 +208,7 @@ const Settings = () => {
                       type="email"
                       value={profileForm.email}
                       onChange={handleProfileChange}
+                      disabled // Email typically can't be changed directly
                     />
                   </div>
                 </div>
@@ -150,7 +222,7 @@ const Settings = () => {
                       onChange={handleProfileChange}
                     />
                   </div>
-                                    <div className="space-y-2">
+                  <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
                     <Input
                       id="phone"
@@ -184,7 +256,12 @@ const Settings = () => {
                       Receive notifications for new orders and status changes
                     </p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch
+                    checked={notificationForm.order_notifications}
+                    onCheckedChange={(checked) =>
+                      handleNotificationChange("order_notifications", checked)
+                    }
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -194,7 +271,12 @@ const Settings = () => {
                       Get notified when products are low in stock
                     </p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch
+                    checked={notificationForm.inventory_alerts}
+                    onCheckedChange={(checked) =>
+                      handleNotificationChange("inventory_alerts", checked)
+                    }
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -204,7 +286,12 @@ const Settings = () => {
                       Receive weekly sales performance reports
                     </p>
                   </div>
-                  <Switch />
+                  <Switch
+                    checked={notificationForm.sales_reports}
+                    onCheckedChange={(checked) =>
+                      handleNotificationChange("sales_reports", checked)
+                    }
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -214,7 +301,12 @@ const Settings = () => {
                       Get promotions and marketing tips
                     </p>
                   </div>
-                  <Switch />
+                  <Switch
+                    checked={notificationForm.marketing_updates}
+                    onCheckedChange={(checked) =>
+                      handleNotificationChange("marketing_updates", checked)
+                    }
+                  />
                 </div>
               </div>
 
@@ -233,21 +325,47 @@ const Settings = () => {
                 <h3 className="text-lg font-medium">Change Password</h3>
                 <div className="grid gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="current-password">Current Password</Label>
-                    <Input id="current-password" type="password" />
+                    <Label htmlFor="currentPassword">Current Password</Label>
+                    <Input
+                      id="currentPassword"
+                      name="currentPassword"
+                      type="password"
+                      value={passwordForm.currentPassword}
+                      onChange={handlePasswordChange}
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="new-password">New Password</Label>
-                    <Input id="new-password" type="password" />
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <Input
+                      id="newPassword"
+                      name="newPassword"
+                      type="password"
+                      value={passwordForm.newPassword}
+                      onChange={handlePasswordChange}
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password">
+                    <Label htmlFor="confirmPassword">
                       Confirm New Password
                     </Label>
-                    <Input id="confirm-password" type="password" />
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      value={passwordForm.confirmPassword}
+                      onChange={handlePasswordChange}
+                    />
                   </div>
                 </div>
-                <Button onClick={savePassword}>Update Password</Button>
+                <Button
+                  onClick={savePassword}
+                  disabled={
+                    !passwordForm.currentPassword ||
+                    !passwordForm.newPassword ||
+                    passwordForm.newPassword !== passwordForm.confirmPassword
+                  }>
+                  Update Password
+                </Button>
               </div>
 
               <div className="border-t pt-6 mt-6">
@@ -281,14 +399,23 @@ const Settings = () => {
                 <div className="flex justify-between items-center mb-4">
                   <div>
                     <h3 className="font-medium">Current Plan</h3>
-                    <p className="text-xl font-bold text-brand">Merchant</p>
-                    <p className="text-sm text-muted-foreground">
-                      You're saving 20%
+                    <p className="text-xl font-bold text-brand">
+                      {settings.subscription?.plan_name || "Free"}
                     </p>
+                    {settings.subscription && (
+                      <p className="text-sm text-muted-foreground">
+                        You're saving 20%
+                      </p>
+                    )}
                   </div>
-                  <span className="text-brand font-medium">
-                    Renews in 3 days
-                  </span>
+                  {settings.subscription?.renewal_date && (
+                    <span className="text-brand font-medium">
+                      Renews{" "}
+                      {new Date(
+                        settings.subscription.renewal_date
+                      ).toLocaleDateString()}
+                    </span>
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -328,41 +455,73 @@ const Settings = () => {
 
               <div>
                 <h3 className="font-medium mb-4">Billing History</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 border rounded-md">
-                    <div>
-                      <p className="font-medium">April 2023</p>
-                      <p className="text-sm text-muted-foreground">
-                        Merchant Plan
-                      </p>
+                {settings.subscription ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 border rounded-md">
+                      <div>
+                        <p className="font-medium">April 2023</p>
+                        <p className="text-sm text-muted-foreground">
+                          {settings.subscription.plan_name} Plan
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span>
+                          Ghc {settings.subscription.amount.toFixed(2)}
+                        </span>
+                        <Button variant="ghost" size="sm">
+                          Receipt
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span>Ghc 150.00</span>
-                      <Button variant="ghost" size="sm">
-                        Receipt
-                      </Button>
+                    <div className="flex items-center justify-between p-3 border rounded-md">
+                      <div>
+                        <p className="font-medium">March 2023</p>
+                        <p className="text-sm text-muted-foreground">
+                          {settings.subscription.plan_name} Plan
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span>
+                          Ghc {settings.subscription.amount.toFixed(2)}
+                        </span>
+                        <Button variant="ghost" size="sm">
+                          Receipt
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between p-3 border rounded-md">
-                    <div>
-                      <p className="font-medium">March 2023</p>
-                      <p className="text-sm text-muted-foreground">
-                        Merchant Plan
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span>Ghc 150.00</span>
-                      <Button variant="ghost" size="sm">
-                        Receipt
-                      </Button>
-                    </div>
+                ) : (
+                  <div className="p-4 border rounded-md text-center">
+                    <p className="text-muted-foreground">
+                      No billing history available
+                    </p>
                   </div>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+};
+
+// Loading state component
+const SettingsLoadingState = () => {
+  return (
+    <div className="container mx-auto p-4 max-w-4xl">
+      <div className="flex items-center gap-2 mb-6">
+        <Skeleton className="h-6 w-6 rounded-full" />
+        <Skeleton className="h-10 w-40" />
+      </div>
+
+      <div className="mb-8">
+        <Skeleton className="h-10 w-full rounded-md" />
+      </div>
+
+      <div className="space-y-6">
+        <Skeleton className="h-72 w-full rounded-md" />
+      </div>
     </div>
   );
 };

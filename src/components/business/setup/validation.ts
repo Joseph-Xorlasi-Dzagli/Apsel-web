@@ -56,6 +56,65 @@ export const businessAddressSchema = z.object({
   region: z.string().min(2, "Region must be at least 2 characters"),
 });
 
+// For mapping to Firestore
+export const mapToFirestore = (formData: any) => {
+  const {
+    // Business profile
+    name,
+    industry,
+    employeeCount,
+    bio,
+
+    // Contact info
+    manager,
+    email,
+    phone,
+
+    // Payment info
+    cardHolderName,
+    cardNumber,
+    expiryDate,
+    cvv,
+
+    // Address info
+    street,
+    country,
+    postalCode,
+    region,
+
+    ...rest
+  } = formData;
+
+  return {
+    // Business profile data
+    name,
+    industry,
+    employee_count: employeeCount,
+    bio,
+    is_open: true,
+
+    // Contact data
+    manager,
+    email,
+    phone,
+
+    // Payment account data (simplified for Firestore)
+    account_holder: cardHolderName,
+    account_number: cardNumber
+      ? cardNumber.replace(/\s/g, "").slice(-4).padStart(16, "*")
+      : undefined,
+    bank_name: "Default Bank",
+
+    // Address data
+    street,
+    country,
+    postal_code: postalCode,
+    state: region,
+
+    ...rest,
+  };
+};
+
 export type BusinessProfileForm = z.infer<typeof businessProfileSchema>;
 export type BusinessContactForm = z.infer<typeof businessContactSchema>;
 export type PaymentAccountForm = z.infer<typeof paymentAccountSchema>;

@@ -11,6 +11,28 @@ export interface Order {
   shippingMethod: 'delivery' | 'pickup';
 }
 
+// src/lib/data.ts
+export interface CustomerType {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  company?: string;
+  location: string;
+  status: 'active' | 'inactive' | 'pending';
+  notes?: string;
+  avatar?: string;
+  createdAt: string; // ISO string format
+  totalSpent: number;
+  orders: number;
+  lastOrder?: string; // ISO string format
+  business_id?: string;
+}
+
+
+// This array is no longer needed with Firestore integration, but kept as reference
+export const mockCustomers: CustomerType[] = [];
+
 export interface Product {
   id: string;
   name: string;
@@ -344,133 +366,133 @@ export const getOrdersByStatus = (orders: Order[]) => {
   return result;
 };
 
-export interface CustomerType {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  location: string;
-  avatar?: string;
-  status: "active" | "inactive" | "pending";
-  notes?: string;
-  createdAt: string;
-  lastOrder?: string;
-  totalSpent: number;
-  orders: number;
-}
+// export interface CustomerType {
+//   id: string;
+//   name: string;
+//   email: string;
+//   phone: string;
+//   company: string;
+//   location: string;
+//   avatar?: string;
+//   status: "active" | "inactive" | "pending";
+//   notes?: string;
+//   createdAt: string;
+//   lastOrder?: string;
+//   totalSpent: number;
+//   orders: number;
+// }
 
 // Mock customers data
-export const mockCustomers: CustomerType[] = [
-  {
-    id: "customer-1",
-    name: "Ahmed Mohammed",
-    email: "ahmed.m@example.com",
-    phone: "233-506-123-456",
-    company: "Westland Electronics",
-    location: "Accra, Ghana",
-    status: "active",
-    notes: "Preferred customer, always pays on time.",
-    createdAt: "2023-02-15T10:30:00Z",
-    lastOrder: "2023-05-10T14:23:00Z",
-    totalSpent: 2450.75,
-    orders: 7,
-  },
-  {
-    id: "customer-2",
-    name: "Kwame Osei",
-    email: "kwame@techub.gh",
-    phone: "233-244-789-123",
-    company: "TechHub Ghana",
-    location: "Kumasi, Ghana",
-    status: "active",
-    notes: "New business client, interested in bulk purchases.",
-    createdAt: "2023-04-22T09:15:00Z",
-    lastOrder: "2023-05-05T11:45:00Z",
-    totalSpent: 1875.25,
-    orders: 3,
-  },
-  {
-    id: "customer-3",
-    name: "Ama Serwaa",
-    email: "ama.s@gmail.com",
-    phone: "233-277-456-789",
-    company: "Serwaa Designs",
-    location: "Takoradi, Ghana",
-    status: "inactive",
-    notes: "Seasonal buyer, mostly active during holidays.",
-    createdAt: "2022-11-30T16:45:00Z",
-    lastOrder: "2023-01-15T10:20:00Z",
-    totalSpent: 950.5,
-    orders: 4,
-  },
-  {
-    id: "customer-4",
-    name: "Kofi Mensah",
-    email: "kofi.mensah@outlook.com",
-    phone: "233-550-321-654",
-    company: "Golden Star Enterprises",
-    location: "Tamale, Ghana",
-    status: "active",
-    createdAt: "2023-03-10T13:20:00Z",
-    lastOrder: "2023-05-18T09:30:00Z",
-    totalSpent: 3250.0,
-    orders: 10,
-  },
-  {
-    id: "customer-5",
-    name: "Fatima Abdullah",
-    email: "fatima.a@yahoo.com",
-    phone: "233-244-987-654",
-    company: "Northern Trading Co.",
-    location: "Bolgatanga, Ghana",
-    status: "pending",
-    notes: "Interested in premium products, negotiating first order.",
-    createdAt: "2023-05-05T11:10:00Z",
-    totalSpent: 0,
-    orders: 0,
-  },
-  {
-    id: "customer-6",
-    name: "Daniel Adjei",
-    email: "daniel.adjei@gmail.com",
-    phone: "233-277-222-333",
-    company: "Adjei & Sons",
-    location: "Cape Coast, Ghana",
-    status: "active",
-    createdAt: "2022-08-12T14:50:00Z",
-    lastOrder: "2023-04-28T16:15:00Z",
-    totalSpent: 4750.25,
-    orders: 15,
-  },
-  {
-    id: "customer-7",
-    name: "Emma Boateng",
-    email: "emma.b@boatengstore.com",
-    phone: "233-244-555-777",
-    company: "Boateng Retail Store",
-    location: "Ho, Ghana",
-    status: "active",
-    notes: "Wholesale buyer, requires monthly supplies.",
-    createdAt: "2022-12-05T09:40:00Z",
-    lastOrder: "2023-05-02T10:30:00Z",
-    totalSpent: 7890.5,
-    orders: 9,
-  },
-  {
-    id: "customer-8",
-    name: "Joseph Akufo",
-    email: "joseph.a@gmail.com",
-    phone: "233-276-123-987",
-    company: "Akufo Mechanics",
-    location: "Sunyani, Ghana",
-    status: "inactive",
-    createdAt: "2022-10-18T15:30:00Z",
-    lastOrder: "2022-12-20T14:10:00Z",
-    totalSpent: 560.25,
-    orders: 2,
-  },
-];
+// export const mockCustomers: CustomerType[] = [
+//   {
+//     id: "customer-1",
+//     name: "Ahmed Mohammed",
+//     email: "ahmed.m@example.com",
+//     phone: "233-506-123-456",
+//     company: "Westland Electronics",
+//     location: "Accra, Ghana",
+//     status: "active",
+//     notes: "Preferred customer, always pays on time.",
+//     createdAt: "2023-02-15T10:30:00Z",
+//     lastOrder: "2023-05-10T14:23:00Z",
+//     totalSpent: 2450.75,
+//     orders: 7,
+//   },
+//   {
+//     id: "customer-2",
+//     name: "Kwame Osei",
+//     email: "kwame@techub.gh",
+//     phone: "233-244-789-123",
+//     company: "TechHub Ghana",
+//     location: "Kumasi, Ghana",
+//     status: "active",
+//     notes: "New business client, interested in bulk purchases.",
+//     createdAt: "2023-04-22T09:15:00Z",
+//     lastOrder: "2023-05-05T11:45:00Z",
+//     totalSpent: 1875.25,
+//     orders: 3,
+//   },
+//   {
+//     id: "customer-3",
+//     name: "Ama Serwaa",
+//     email: "ama.s@gmail.com",
+//     phone: "233-277-456-789",
+//     company: "Serwaa Designs",
+//     location: "Takoradi, Ghana",
+//     status: "inactive",
+//     notes: "Seasonal buyer, mostly active during holidays.",
+//     createdAt: "2022-11-30T16:45:00Z",
+//     lastOrder: "2023-01-15T10:20:00Z",
+//     totalSpent: 950.5,
+//     orders: 4,
+//   },
+//   {
+//     id: "customer-4",
+//     name: "Kofi Mensah",
+//     email: "kofi.mensah@outlook.com",
+//     phone: "233-550-321-654",
+//     company: "Golden Star Enterprises",
+//     location: "Tamale, Ghana",
+//     status: "active",
+//     createdAt: "2023-03-10T13:20:00Z",
+//     lastOrder: "2023-05-18T09:30:00Z",
+//     totalSpent: 3250.0,
+//     orders: 10,
+//   },
+//   {
+//     id: "customer-5",
+//     name: "Fatima Abdullah",
+//     email: "fatima.a@yahoo.com",
+//     phone: "233-244-987-654",
+//     company: "Northern Trading Co.",
+//     location: "Bolgatanga, Ghana",
+//     status: "pending",
+//     notes: "Interested in premium products, negotiating first order.",
+//     createdAt: "2023-05-05T11:10:00Z",
+//     totalSpent: 0,
+//     orders: 0,
+//   },
+//   {
+//     id: "customer-6",
+//     name: "Daniel Adjei",
+//     email: "daniel.adjei@gmail.com",
+//     phone: "233-277-222-333",
+//     company: "Adjei & Sons",
+//     location: "Cape Coast, Ghana",
+//     status: "active",
+//     createdAt: "2022-08-12T14:50:00Z",
+//     lastOrder: "2023-04-28T16:15:00Z",
+//     totalSpent: 4750.25,
+//     orders: 15,
+//   },
+//   {
+//     id: "customer-7",
+//     name: "Emma Boateng",
+//     email: "emma.b@boatengstore.com",
+//     phone: "233-244-555-777",
+//     company: "Boateng Retail Store",
+//     location: "Ho, Ghana",
+//     status: "active",
+//     notes: "Wholesale buyer, requires monthly supplies.",
+//     createdAt: "2022-12-05T09:40:00Z",
+//     lastOrder: "2023-05-02T10:30:00Z",
+//     totalSpent: 7890.5,
+//     orders: 9,
+//   },
+//   {
+//     id: "customer-8",
+//     name: "Joseph Akufo",
+//     email: "joseph.a@gmail.com",
+//     phone: "233-276-123-987",
+//     company: "Akufo Mechanics",
+//     location: "Sunyani, Ghana",
+//     status: "inactive",
+//     createdAt: "2022-10-18T15:30:00Z",
+//     lastOrder: "2022-12-20T14:10:00Z",
+//     totalSpent: 560.25,
+//     orders: 2,
+//   },
+// ];
 
 // Function to format currency for display
 export const formatCurrency = (amount: number): string => {

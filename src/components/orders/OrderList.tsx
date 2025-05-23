@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -29,8 +29,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getOrderStatusColorByName } from "@/services/firestoreService";
+import { useOrders } from "@/hooks/useOrders";
 
 interface OrderListProps {
+  businessId: string;
   orders: Order[];
   currentPage: number;
   totalPages: number;
@@ -55,7 +58,10 @@ const getStatusColor = (status: OrderStatus) => {
   }
 };
 
+
+
 export function OrderList({
+  businessId,
   orders,
   currentPage,
   totalPages,
@@ -74,6 +80,41 @@ export function OrderList({
 
   const startItem = (currentPage - 1) * ordersPerPage + 1;
   const endItem = Math.min(currentPage * ordersPerPage, totalOrders);
+  const [statusColors, setStatusColors] = useState<Record<string, string>>({});
+  const {
+      updateStatus,
+    } = useOrders();
+
+
+
+  useEffect(() => {
+    const fetchColors = async () => {
+      const colorMap: Record<string, string> = {};
+
+      await Promise.all(
+        orders.map(async (order) => {
+          try {
+            const color = await getOrderStatusColorByName(
+              businessId,
+              order.status
+            );
+            const safeColor = color || "gray"; // fallback
+            colorMap[order.id] = safeColor;
+          } catch (err) {
+            console.error(`Failed to fetch color for order ${order.id}`, err);
+            colorMap[order.id] = "gray"; // fallback
+          }
+        })
+      );
+
+      setStatusColors(colorMap);
+    };
+
+    if (orders.length > 0) {
+      fetchColors();
+    }
+  }, [orders]);
+  
 
   // Toggle visibility of checkboxes and action buttons
   const toggleControls = () => {
@@ -136,12 +177,23 @@ export function OrderList({
   };
 
   // Update order statuses
-  const handleUpdateStatus = (
+  const handleUpdateStatus = async (
     newStatus: OrderStatus,
     sendNote: boolean,
     note?: string
-  ) => {
+  ): Promise<void> => {
     // In a real app, this would call an API to update the status
+    // For each selected order, call updateStatus (assuming updateStatus is available in scope)
+    for (const orderId of selectedOrderIds) {
+      const success =  await updateStatus(
+        orderId,
+        newStatus,
+        sendNote ? note : undefined
+      );
+      if (!success) {
+        console.error(`Failed to update order ${orderId} to status ${newStatus}`);
+      }
+    }
     console.log(
       `Updating ${selectedOrderIds.length} orders to status: ${newStatus}`
     );
@@ -267,7 +319,7 @@ export function OrderList({
                   <TableCell>
                     <Badge
                       variant="outline"
-                      className={`${getStatusColor(order.status)}`}>
+                      className={`bg-${statusColors[order.id]}-100`}>
                       {order.status}
                     </Badge>
                   </TableCell>

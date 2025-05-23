@@ -1,0 +1,230 @@
+users/
+  {userId}/
+    email: string
+    name: string
+    phone: string
+    created_at: timestamp
+    updated_at: timestamp
+    last_login: timestamp
+
+businesses/
+  {businessId}/
+    owner_id: string (reference to users)
+    name: string
+    industry: string
+    employee_count: string
+    bio: string
+    logo_url: string
+    is_open: boolean
+    created_at: timestamp
+    updated_at: timestamp
+
+business_contacts/
+  {businessId}/
+    manager: string
+    email: string
+    phone: string
+    whatsapp: string
+    created_at: timestamp
+    updated_at: timestamp
+
+business_addresses/
+  {businessId}/
+    street: string
+    city: string
+    state: string
+    country: string
+    postal_code: string
+    created_at: timestamp
+    updated_at: timestamp
+
+settlement_accounts/
+  {accountId}/
+    business_id: string (reference to businesses)
+    account_number: string
+    account_holder: string
+    account_provider: string
+    created_at: timestamp
+    updated_at: timestamp
+
+customers/
+  {customerId}/
+    business_id: string (reference to businesses)
+    name: string
+    email: string
+    phone: string
+    location: string
+    status: string
+    notes: string
+    avatar_url: string
+    created_at: timestamp
+    updated_at: timestamp
+
+payment_accounts/
+  {accountId}/
+    customer_id: string (reference to customers)
+    account_number: string
+    account_holder: string
+    account_provider: string
+    is_default: boolean
+    created_at: timestamp
+    updated_at: timestamp
+
+categories/
+  {categoryId}/
+    business_id: string (reference to businesses)
+    name: string
+    description: string
+    image_url: string
+    created_at: timestamp
+    updated_at: timestamp
+
+products/
+  {productId}/
+    business_id: string (reference to businesses)
+    category_id: string (reference to categories)
+    name: string
+    description: string
+    terms_of_service: string
+    available_for_delivery: boolean
+    available_for_pickup: boolean
+    created_at: timestamp
+    updated_at: timestamp
+
+product_options/
+  {optionId}/
+    product_id: string (reference to products)
+    name: string
+    price: number
+    stock: number
+    image_url: string
+    description: string
+    terms_of_service: string
+    available_for_delivery: boolean
+    available_for_pickup: boolean
+    created_at: timestamp
+    updated_at: timestamp
+    sold: number
+
+orders/
+  {orderId}/
+    business_id: string (reference to businesses)
+    customer: {
+      name: string
+      email: string
+      phone: string
+      id: string (optional, reference to customers collection)
+    }
+    status: string (pending, processing, completed, canceled)
+    shipping_method: string (delivery, pickup)
+    shipping_address: string
+    city: string
+    subtotal: number
+    shipping_fee: number
+    tax: number
+    total: number
+    payment_method: string
+    payment_status: string (paid, unpaid)
+    payment_reference: string
+    notes: string
+    item_count: number
+    tracking_number: string (optional)
+    created_at: timestamp
+    updated_at: timestamp
+    completed_at: timestamp (optional)
+
+orders/
+  {orderId}/
+    items/
+      {itemId}/
+        product_id: string (reference to products)
+        name: string
+        price: number
+        quantity: number
+        total: number
+        created_at: timestamp
+
+order_statuses/
+  {statusId}/
+    business_id: string (reference to businesses)
+    name: string
+    color: string
+    description: string
+    is_default: boolean
+    created_at: timestamp
+    updated_at: timestamp
+
+order_history/
+  {historyId}/
+    order_id: string (reference to orders)
+    status: string
+    notes: string
+    created_by: string (user id who made the change)
+    created_at: timestamp
+
+order_notifications/
+  {notificationId}/
+    order_id: string (reference to orders)
+    customer_id: string (optional, reference to customers)
+    business_id: string (reference to businesses)
+    type: string (order_created, status_changed, payment_received, etc)
+    message: string
+    is_read: boolean
+    created_at: timestamp
+
+transactions/
+  {transactionId}/
+    business_id: string (reference to businesses)
+    order_id: string (reference to orders)
+    customer_id: string (reference to customers)
+    payment_account_id: string (reference to payment_accounts)
+    settlement_account_id: string (reference to settlement_accounts)
+    type: string
+    status: string
+    amount: number
+    reference: string
+    payment_date: timestamp
+    created_at: timestamp
+
+billing_accounts/
+  {accountId}/
+    business_id: string (reference to businesses)
+    card_holder_name: string
+    card_last_four: string
+    card_type: string
+    expiry_month: number
+    expiry_year: number
+    cvv: string
+    is_default: boolean
+    created_at: timestamp
+    updated_at: timestamp
+
+subscription_plans/
+  {planId}/
+    name: string
+    description: string
+    price: number
+    billing_cycle: string
+    features: map
+    created_at: timestamp
+    updated_at: timestamp
+
+subscriptions/
+  {subscriptionId}/
+    business_id: string (reference to businesses)
+    plan_id: string (reference to subscription_plans)
+    status: string
+    start_date: timestamp
+    expiry_date: timestamp
+    auto_renew: boolean
+    created_at: timestamp
+    updated_at: timestamp
+
+subscription_payments/
+  {paymentId}/
+    subscription_id: string (reference to subscriptions)
+    billing_account_id: string (reference to billing_accounts)
+    amount: number
+    reference: string
+    payment_date: timestamp
+

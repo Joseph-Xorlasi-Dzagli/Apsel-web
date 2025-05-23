@@ -1,8 +1,12 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+interface Category {
+  id: string;
+  name: string;
+}
 
 interface ProductFiltersProps {
   searchTerm: string;
@@ -11,7 +15,7 @@ interface ProductFiltersProps {
   setCategoryFilter: (category: string) => void;
   sortBy: "name" | "price" | "stock" | "sold";
   setSortBy: (sortBy: "name" | "price" | "stock" | "sold") => void;
-  categories?: string[];
+  categories?: Category[];
 }
 
 export function ProductFilters({
@@ -21,14 +25,24 @@ export function ProductFilters({
   setCategoryFilter,
   sortBy,
   setSortBy,
-  categories = ["Electronics", "Clothing", "Food & Beverages", "Home & Garden"],
+  categories = [],
 }: ProductFiltersProps) {
   const isMobile = useIsMobile();
 
+  // Add a safety wrapper for categoryFilter changes
+  const handleCategoryChange = (categoryId: string) => {
+    console.log("Setting category filter to:", categoryId);
+    if (typeof setCategoryFilter === "function") {
+      setCategoryFilter(categoryId);
+    } else {
+      console.error("setCategoryFilter is not a function:", setCategoryFilter);
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row  gap-4">
-        <div className="relative w-full sm:w-64 h-full pt-6 mr-8">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative w-full sm:w-72 h-full pt-6 mr-8">
           <Search className="absolute left-3 bottom-3 text-muted-foreground h-4 w-4" />
           <Input
             placeholder="Search products..."
@@ -39,20 +53,20 @@ export function ProductFilters({
         </div>
         <div>
           <h3 className="mb-2 text-sm font-medium">Category</h3>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 max-w-screen-md">
             <Button
               variant={categoryFilter === "all" ? "default" : "outline"}
               size="sm"
-              onClick={() => setCategoryFilter("all")}>
+              onClick={() => handleCategoryChange("all")}>
               All
             </Button>
             {categories.map((category) => (
               <Button
-                key={category}
-                variant={categoryFilter === category ? "default" : "outline"}
+                key={category.id}
+                variant={categoryFilter === category.id ? "default" : "outline"}
                 size="sm"
-                onClick={() => setCategoryFilter(category)}>
-                {category}
+                onClick={() => handleCategoryChange(category.id)}>
+                {category.name}
               </Button>
             ))}
           </div>

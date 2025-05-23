@@ -2,7 +2,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Building, Users } from "lucide-react";
+import { Building, Users, CheckCircle } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -29,10 +29,12 @@ const welcomeSchema = z.object({
 });
 
 interface WelcomeScreenProps {
-  onComplete: () => void;
+  onComplete: (data: z.infer<typeof welcomeSchema>) => void;
 }
 
 export const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const form = useForm<z.infer<typeof welcomeSchema>>({
     resolver: zodResolver(welcomeSchema),
     defaultValues: {
@@ -43,14 +45,18 @@ export const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
   });
 
   const handleSubmit = (data: z.infer<typeof welcomeSchema>) => {
-    console.log("Welcome form data:", data);
-    onComplete();
+    setIsSubmitting(true);
+    onComplete(data);
+    setIsSubmitting(false);
   };
 
   return (
     <div className="space-y-6 animate-in-slide">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold">Welcome aboard!</h1>
+        <div className="flex items-center gap-2">
+          <CheckCircle className="h-8 w-8 text-green-500" />
+          <h1 className="text-3xl font-bold">Welcome aboard!</h1>
+        </div>
         <p className="text-muted-foreground">
           Let's get your business started. Please tell us about your business.
         </p>
@@ -139,8 +145,9 @@ export const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
 
           <Button
             type="submit"
-            className="w-full bg-cyan-500 hover:bg-cyan-600 mt-6">
-            Let's Go!
+            className="w-full bg-cyan-500 hover:bg-cyan-600 mt-6"
+            disabled={isSubmitting}>
+            {isSubmitting ? "Setting Up..." : "Let's Go!"}
           </Button>
         </form>
       </Form>
